@@ -188,8 +188,8 @@ func popup_text(world_pos: Vector3, text: String, color: Color) -> void:
 	fade.tween_callback(lbl.queue_free)
 
 func _build_decks() -> void:
-	_make_deck("bug", Vector3(5.5, 0, -5.5), Color(0.86, 0.5, 0.2), "BUGS")
-	_make_deck("retro", Vector3(-5.5, 0, 5.5), Color(0.25, 0.46, 0.82), "RETRO")
+	_make_deck("bug", Vector3(5.5, 0, -5.5), Color.html("#E08A1E"), "BUG")
+	_make_deck("retro", Vector3(-5.5, 0, 5.5), Color.html("#2E6FB0"), "RETRO")
 
 func _make_deck(kind: String, pos: Vector3, color: Color, title: String) -> void:
 	_deck_pos[kind] = pos

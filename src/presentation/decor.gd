@@ -23,8 +23,6 @@ func build(board_half: float) -> void:
 	_chase("shaun", "zombie_basic", bz, 0.55, 0.0, bh + 13.0)
 	_fight("sam", "Slash", "zombie_chubby", "Attack", Vector3(bh + 7.0, 0, bz - 2.0))
 	_runner(_load_char("pug", "Run", 3.0), bz - 3.0, 0.9, 1.5, bh + 12.0)
-	_bob(_cloud(), Vector3(bh + 2.0, 5.6, -4.5), 2.0, 0.45, 0.8)
-	_bob(_cloud(), Vector3(-(bh + 4.0), 6.6, 8.5), 1.0, 0.4, 0.7)
 
 func _chase(survivor: String, zombie: String, z: float, speed: float, phase: float, range: float) -> void:
 	_runner(_load_char(survivor, "Run", 2.4), z, speed, phase, range)

@@ -172,7 +172,7 @@ func _show_help() -> void:
 	_show_info("CÓMO JUGAR", "•  Tirá los dados y avanzá por el tablero.\n•  Comprá módulos de software (propiedades) y cobrá renta a quien caiga ahí.\n•  Construí cobertura de tests → CI/CD para subir la renta (los edificios crecen).\n•  Cuidado con la Deuda Técnica: acumula interés cada turno; refactorizá en el Coffee Break.\n•  Acertá los Retos QA para ganar cartas: Hotfix (limpia deuda), Rollback (recupera tu último gasto), Feature Flag (próxima renta gratis).\n•  El último jugador en pie shipea el release y gana.")
 
 func _show_credits() -> void:
-	_show_info("CRÉDITOS", "BUGOPOLY — juego de mesa digital de QA y programación.\nHecho con Godot Engine 4.6.\n\nAssets (todos libres / CC0):\n• Monstruos y personajes — Quaternius\n• Edificios y props — Kenney\n• Texturas de madera — Poly Haven (CC0)\n• Música de menú — OpenGameArt (CC0)\n• Sonidos y voces — Kenney (CC0)\n• Fuentes — Bungee y Archivo Black (Google Fonts, OFL)")
+	_show_info("CRÉDITOS", "BUGOPOLY — juego de mesa digital de QA y programación.\n\nCreado por Fernando Loján.\nHecho con Godot Engine 4.6.\n\nAssets (todos libres / CC0):\n• Monstruos y personajes — Quaternius\n• Edificios y props — Kenney\n• Texturas de madera — Poly Haven (CC0)\n• Música de menú — OpenGameArt (CC0)\n• Sonidos y voces — Kenney (CC0)\n• Fuentes — Bungee y Archivo Black (Google Fonts, OFL)")
 
 func _show_info(title_text: String, body: String) -> void:
 	var root := Control.new()
