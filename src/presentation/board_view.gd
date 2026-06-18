@@ -544,9 +544,26 @@ func _dust_puff(pos: Vector3) -> void:
 	add_child(p)
 	p.finished.connect(p.queue_free)
 
+func _load_vehicle() -> Node3D:
+	# Camión real del pack (Quaternius, CC0) cargado en runtime; si falla, tractor de primitivas.
+	var abs_path := ProjectSettings.globalize_path("res://assets/bugopoly/models/truck.gltf")
+	if FileAccess.file_exists(abs_path):
+		var doc := GLTFDocument.new()
+		var st := GLTFState.new()
+		if doc.append_from_file(abs_path, st) == OK:
+			var inst: Node = doc.generate_scene(st)
+			if inst != null:
+				var holder := Node3D.new()
+				var wrap := Node3D.new()
+				wrap.scale = Vector3(0.26, 0.26, 0.26)
+				wrap.add_child(inst)
+				holder.add_child(wrap)
+				return holder
+	return _make_tractor()
+
 func _tractor_pass(holder: Node3D, center: Vector3, along: Vector3) -> void:
-	# Tractor que cruza el lote aplanando el terreno (al comprar).
-	var t := _make_tractor()
+	# Vehículo de obra que cruza el lote aplanando el terreno (al comprar).
+	var t := _load_vehicle()
 	var d := CORNER * 0.32
 	t.position = center + along * d + Vector3(0, 0.05, 0)
 	t.rotation.y = atan2(-along.x, -along.z)  # el frente (+Z) lidera
@@ -626,8 +643,10 @@ func _make_bill(value: int = 100) -> Node3D:
 	val.font = Brand.font_display()
 	val.font_size = 56
 	val.pixel_size = 0.0050
-	val.modulate = ink
-	val.position = Vector3(-0.34, 0.012, 0.12)
+	val.modulate = Color(0.98, 0.96, 0.90)
+	val.outline_size = 12
+	val.outline_modulate = ink
+	val.position = Vector3(-0.30, 0.012, 0.10)
 	val.rotation_degrees = Vector3(-90, 0, 0)
 	n.add_child(val)
 	var cr := Label3D.new()
@@ -635,8 +654,10 @@ func _make_bill(value: int = 100) -> Node3D:
 	cr.font = Brand.font_heavy()
 	cr.font_size = 22
 	cr.pixel_size = 0.0040
-	cr.modulate = ink
-	cr.position = Vector3(-0.32, 0.012, 0.28)
+	cr.modulate = Color(0.98, 0.96, 0.90)
+	cr.outline_size = 8
+	cr.outline_modulate = ink
+	cr.position = Vector3(-0.28, 0.012, 0.30)
 	cr.rotation_degrees = Vector3(-90, 0, 0)
 	n.add_child(cr)
 	n.rotation_degrees = Vector3(0, randf() * 360.0, 0)
@@ -669,6 +690,7 @@ func _bill_svg(value: int) -> String:
 	var s := '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" width="360" height="200">'
 	s += '<rect x="3" y="3" width="354" height="194" rx="16" fill="' + ph + '"/>'
 	s += '<rect x="3" y="3" width="354" height="118" rx="16" fill="' + lite + '" fill-opacity="0.5"/>'
+	s += '<rect x="22" y="44" width="152" height="112" rx="12" fill="' + ih + '" fill-opacity="0.9"/>'
 	s += '<rect x="11" y="11" width="338" height="178" rx="11" fill="none" stroke="' + ih + '" stroke-width="3" opacity="0.85"/>'
 	s += '<rect x="17" y="17" width="326" height="166" rx="7" fill="none" stroke="' + ih + '" stroke-width="1.5" opacity="0.5"/>'
 	s += '<g fill="none" stroke="' + ih + '" stroke-width="1.2" opacity="0.16"><circle cx="78" cy="100" r="48"/><circle cx="78" cy="100" r="38"/><circle cx="78" cy="100" r="28"/><circle cx="78" cy="100" r="18"/></g>'
@@ -683,8 +705,8 @@ func _bill_style(value: int) -> Array:
 		10: return [Color.html("#c4c4c4"), Color.html("#2f2f2f")]
 		50: return [Color.html("#a8cdee"), Color.html("#143f6b")]
 		100: return [Color.html("#a6d4b2"), Color.html("#155a2e")]
-		500: return [Color.html("#f0b85a"), Color.html("#7a4408")]
-		_: return [Color.html("#f0c419"), Color.html("#5c4a00")]
+		500: return [Color.html("#e8a83a"), Color.html("#6e3d06")]
+		_: return [Color.html("#d6a420"), Color.html("#473600")]
 
 # ---------- juice / pulido ----------
 
