@@ -491,7 +491,8 @@ func _pop(node: Node3D) -> void:
 
 func fly_bills(from: Vector3, to: Vector3, count: int) -> void:
 	for k in count:
-		var bill := _make_bill()
+		var value: int = [10, 50, 100, 500, 1000][randi() % 5]
+		var bill := _make_bill(value)
 		bill.position = from + Vector3(0, 0.6, 0)
 		add_child(bill)
 		var mid := (from + to) * 0.5 + Vector3(randf_range(-0.35, 0.35), 2.1 + k * 0.25, randf_range(-0.35, 0.35))
@@ -503,14 +504,34 @@ func fly_bills(from: Vector3, to: Vector3, count: int) -> void:
 		tw.tween_property(bill, "scale", Vector3.ZERO, 0.12)
 		tw.tween_callback(bill.queue_free)
 
-func _make_bill() -> Node3D:
-	# Billete QA Credits: crema con campo dorado y sello rojo.
+func _make_bill(value: int = 100) -> Node3D:
+	# Billete QA Credits con denominación (paleta del kit por valor).
+	var st := _bill_style(value)
+	var paper: Color = st[0]
+	var ink: Color = st[1]
 	var n := Node3D.new()
-	n.add_child(_part(_box(1.05, 0.03, 0.52), _mat(Brand.CREAM), Vector3.ZERO))
-	n.add_child(_part(_box(0.86, 0.034, 0.38), _emissive(Brand.GOLD, 0.5), Vector3(0, 0.003, 0)))
-	n.add_child(_part(_box(0.24, 0.038, 0.24), _mat(Brand.RED), Vector3(0, 0.006, 0)))
+	n.add_child(_part(_box(1.15, 0.03, 0.6), _mat(paper), Vector3.ZERO))
+	n.add_child(_part(_box(1.02, 0.032, 0.48), _mat(Color(ink.r, ink.g, ink.b, 0.16)), Vector3(0, 0.002, 0)))
+	n.add_child(_part(_box(0.2, 0.034, 0.2), _mat(ink), Vector3(0.38, 0.006, 0)))
+	var lbl := Label3D.new()
+	lbl.text = str(value)
+	lbl.font = Brand.font_display()
+	lbl.font_size = 64
+	lbl.pixel_size = 0.0055
+	lbl.modulate = ink
+	lbl.position = Vector3(-0.1, 0.02, 0)
+	lbl.rotation_degrees = Vector3(-90, 0, 0)
+	n.add_child(lbl)
 	n.rotation_degrees = Vector3(0, randf() * 360.0, 0)
 	return n
+
+func _bill_style(value: int) -> Array:
+	match value:
+		10: return [Color.html("#eceae4"), Color.html("#4f4f4f")]
+		50: return [Color.html("#dce8f4"), Color.html("#1f5286")]
+		100: return [Color.html("#dcecdf"), Color.html("#1a5e30")]
+		500: return [Color.html("#f6e7cf"), Color.html("#a5620f")]
+		_: return [Color.html("#fbf1c9"), Color.html("#8a6f08")]
 
 # ---------- juice / pulido ----------
 

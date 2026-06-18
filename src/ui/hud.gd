@@ -2,6 +2,11 @@ class_name Hud
 extends CanvasLayer
 
 const Brand = preload("res://src/ui/palette.gd")
+const SUB_ICON := {
+	"frontend": "terminal", "backend": "server", "database": "database",
+	"auth": "lock", "payments": "credit-card", "mobile": "search",
+	"analytics": "search", "infra": "server", "pipeline": "git-branch", "cloud": "server",
+}
 
 signal roll_pressed
 signal property_decision(buy)
@@ -288,21 +293,24 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	band.add_theme_stylebox_override("panel", bsb)
 	var bandv := VBoxContainer.new()
 	bandv.add_theme_constant_override("separation", 1)
+	bandv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kicker := Label.new()
-	kicker.text = "MÓDULO · %s" % str(sub.get("name", "")).to_upper()
+	kicker.text = "SUBSISTEMA · %s" % str(sub.get("name", "")).to_upper()
 	kicker.add_theme_font_override("font", Brand.font_heavy())
 	kicker.add_theme_font_size_override("font_size", 12)
 	kicker.add_theme_color_override("font_color", Color(1, 1, 1, 0.82))
-	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bandv.add_child(kicker)
 	var nm := Label.new()
 	nm.text = str(tile.get("name", "Propiedad")).to_upper()
-	nm.add_theme_font_override("font", Brand.font_heavy())
-	nm.add_theme_font_size_override("font_size", 26)
+	nm.add_theme_font_override("font", Brand.font_display())
+	nm.add_theme_font_size_override("font_size", 24)
 	nm.add_theme_color_override("font_color", Brand.WHITE)
-	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bandv.add_child(nm)
-	band.add_child(bandv)
+	var bandh := HBoxContainer.new()
+	bandh.add_theme_constant_override("separation", 10)
+	bandh.add_child(bandv)
+	bandh.add_child(_deed_icon(str(SUB_ICON.get(str(tile.get("subsystem", "")), "gear")), Color(1, 1, 1, 0.88), 36))
+	band.add_child(bandh)
 	deed.add_child(band)
 
 	var body := PanelContainer.new()
@@ -314,6 +322,10 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	ysb.content_margin_right = 22
 	ysb.content_margin_top = 14
 	ysb.content_margin_bottom = 16
+	ysb.border_color = Color(col.r, col.g, col.b, 0.45)
+	ysb.border_width_left = 2
+	ysb.border_width_right = 2
+	ysb.border_width_bottom = 2
 	body.add_theme_stylebox_override("panel", ysb)
 	var bv := VBoxContainer.new()
 	bv.add_theme_constant_override("separation", 5)
@@ -324,7 +336,16 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	bv.add_child(_deed_row("con CI/CD (release)", "$%d" % int(base * 9.0), false))
 	var sep := HSeparator.new()
 	bv.add_child(sep)
-	bv.add_child(_deed_row("Mejora de cobertura", "$%d c/u" % int(price * 0.5), false))
+	bv.add_child(_deed_row("Hipoteca", "$%d" % int(price * 0.5), false))
+	bv.add_child(_deed_row("Coste por test", "$%d c/u" % int(price * 0.5), false))
+	var foot := Label.new()
+	foot.text = "Set completo (CI·CD) duplica la renta base.  ·  BUGOPOLY — no es Monopoly."
+	foot.add_theme_font_size_override("font_size", 11)
+	foot.add_theme_color_override("font_color", Color(0.54, 0.50, 0.42))
+	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	foot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	foot.custom_minimum_size = Vector2(396, 0)
+	bv.add_child(foot)
 	body.add_child(bv)
 	deed.add_child(body)
 	_popup_box.add_child(deed)
@@ -368,6 +389,19 @@ func _deed_row(label: String, value: String, strong: bool) -> HBoxContainer:
 	v.add_theme_color_override("font_color", ink)
 	h.add_child(v)
 	return h
+
+func _deed_icon(name: String, col: Color, size: int) -> TextureRect:
+	var tr := TextureRect.new()
+	tr.custom_minimum_size = Vector2(size, size)
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var path := "res://assets/bugopoly/icons/%s.svg" % name
+	if not FileAccess.file_exists(path):
+		return tr
+	var svg := FileAccess.get_file_as_string(path).replace("currentColor", "#" + col.to_html(false))
+	var img := Image.new()
+	if img.load_svg_from_string(svg, float(size) / 24.0 * 2.0) == OK:
+		tr.texture = ImageTexture.create_from_image(img)
+	return tr
 
 func show_build(tile: Dictionary, houses: int, cost: int, can_afford: bool) -> void:
 	_clear_popup()

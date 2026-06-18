@@ -9,6 +9,7 @@ config/name="Bugopoly"
 config/description="Monopoly con tematica de Software QA. Compra modulos, caza bugs, cobra por cada defecto. Data-driven y modeable (estilo Vorenth)."
 run/main_scene="res://src/world/start_screen.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
+config/icon="res://assets/bugopoly/icon.svg"
 
 [autoload]
 

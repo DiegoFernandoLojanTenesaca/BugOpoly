@@ -19,6 +19,7 @@ var _scene_runners: Array = []  # personajes corriendo de lado a lado
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_apply_window_icon()
 	_build_background()
 	_build_scene()
 	_build_vignette()
@@ -26,6 +27,16 @@ func _ready() -> void:
 	_build_main_menu()
 	_build_props()
 	_animate_in()
+
+func _apply_window_icon() -> void:
+	# Icono del kit (cíclope) en la ventana, rasterizado en runtime.
+	var path := "res://assets/bugopoly/icon.svg"
+	if not FileAccess.file_exists(path):
+		return
+	var svg := FileAccess.get_file_as_string(path)
+	var img := Image.new()
+	if img.load_svg_from_string(svg, 0.5) == OK:
+		DisplayServer.set_icon(img)
 
 func _build_background() -> void:
 	var grad := Gradient.new()
@@ -49,19 +60,20 @@ func _build_background() -> void:
 	gtw.tween_property(tex, "fill_from", Vector2(0.6, 0.46), 7.0).set_trans(Tween.TRANS_SINE)
 
 func _build_title() -> void:
-	var title := Label.new()
-	_title = title
-	title.text = "BUGOPOLY"
-	title.add_theme_font_override("font", Brand.font_display())
-	title.add_theme_font_size_override("font_size", 84)
-	title.add_theme_color_override("font_color", Brand.RED)
-	title.add_theme_constant_override("outline_size", 12)
-	title.add_theme_color_override("font_outline_color", Color("3a0f0d"))
-	title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
-	title.add_theme_constant_override("shadow_offset_x", 0)
-	title.add_theme_constant_override("shadow_offset_y", 7)
-	title.position = Vector2(54, 24)
-	add_child(title)
+	var holder := Control.new()
+	_title = holder
+	holder.position = Vector2(54, 24)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+	# extrude 3D: capas rojas oscuras desplazadas detrás del wordmark
+	for layer in [[Vector2(8, 10), Color("2a0a09")], [Vector2(6, 7), Color("3a0e0c")], [Vector2(4, 5), Color("5c1614")], [Vector2(2, 2), Color("7a1f1d")]]:
+		var sh := _wordmark(layer[1])
+		sh.position = layer[0]
+		holder.add_child(sh)
+	var main := _wordmark(Brand.RED)
+	main.add_theme_constant_override("outline_size", 10)
+	main.add_theme_color_override("font_outline_color", Color("1c0807"))
+	holder.add_child(main)
 
 	var sub := Label.new()
 	_sub = sub
@@ -87,6 +99,15 @@ func _build_title() -> void:
 	fd.tween_interval(2.6)
 	fd.tween_property(sheen, "color:a", 0.16, 0.5).from(0.0)
 	fd.tween_property(sheen, "color:a", 0.0, 0.5)
+
+func _wordmark(col: Color) -> Label:
+	var l := Label.new()
+	l.text = "BUGOPOLY"
+	l.add_theme_font_override("font", Brand.font_display())
+	l.add_theme_font_size_override("font_size", 84)
+	l.add_theme_color_override("font_color", col)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
 
 func _show_players() -> void:
 	if _players_overlay != null:

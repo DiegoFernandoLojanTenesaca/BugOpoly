@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="70%" cy="18%" r="95%">
+      <stop offset="0%" stop-color="#2c2118"/>
+      <stop offset="55%" stop-color="#14110E"/>
+      <stop offset="100%" stop-color="#0E1014"/>
+    </radialGradient>
+    <radialGradient id="gold" cx="50%" cy="84%" r="60%">
+      <stop offset="0%" stop-color="#F0C419" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#F0C419" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx="42%" cy="34%" r="80%">
+      <stop offset="0%" stop-color="#d2443f"/>
+      <stop offset="100%" stop-color="#9e2a27"/>
+    </radialGradient>
+    <clipPath id="clip"><rect x="0" y="0" width="512" height="512" rx="112"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+    <path d="M0,0 L168,0 L168,120 Q168,168 120,168 L0,168 Z" fill="#2E6FB0"/>
+    <rect x="0" y="0" width="512" height="512" fill="url(#gold)"/>
+
+    <!-- patas -->
+    <ellipse cx="212" cy="378" rx="32" ry="22" fill="#7a1f1d"/>
+    <ellipse cx="300" cy="378" rx="32" ry="22" fill="#7a1f1d"/>
+    <!-- cuernos -->
+    <path d="M206,138 L188,86 L236,124 Z" fill="#E6D9BD" stroke="#1c0807" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M306,138 L324,86 L276,124 Z" fill="#E6D9BD" stroke="#1c0807" stroke-width="6" stroke-linejoin="round"/>
+    <!-- cuerpo -->
+    <ellipse cx="256" cy="252" rx="132" ry="142" fill="url(#body)" stroke="#1c0807" stroke-width="9"/>
+    <!-- panza -->
+    <ellipse cx="256" cy="300" rx="74" ry="60" fill="#E6D9BD" fill-opacity="0.20"/>
+    <!-- ojo (cíclope) -->
+    <circle cx="256" cy="232" r="66" fill="#ffffff" stroke="#1c0807" stroke-width="8"/>
+    <circle cx="256" cy="240" r="30" fill="#14110E"/>
+    <circle cx="240" cy="224" r="11" fill="#ffffff"/>
+    <!-- boca -->
+    <path d="M214,322 Q256,356 298,322" fill="none" stroke="#1c0807" stroke-width="8" stroke-linecap="round"/>
+    <!-- colmillos -->
+    <path d="M236,330 L230,348 L246,336 Z" fill="#ffffff"/>
+    <path d="M276,330 L282,348 L266,336 Z" fill="#ffffff"/>
+  </g>
+</svg>
