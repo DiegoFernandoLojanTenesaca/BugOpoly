@@ -119,26 +119,6 @@ func build(state) -> void:
 	_ring.visible = false
 	add_child(_ring)
 
-	# haz de luz vertical sobre la ficha del turno
-	_beam = MeshInstance3D.new()
-	var beam_mesh := CylinderMesh.new()
-	beam_mesh.top_radius = 0.62
-	beam_mesh.bottom_radius = 0.08
-	beam_mesh.height = 5.2
-	_beam.mesh = beam_mesh
-	var bmat := StandardMaterial3D.new()
-	bmat.albedo_color = Color(1.0, 0.86, 0.34, 0.16)
-	bmat.emission_enabled = true
-	bmat.emission = Color(1.0, 0.82, 0.34)
-	bmat.emission_energy_multiplier = 1.4
-	bmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	bmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	bmat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	bmat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
-	_beam.material_override = bmat
-	_beam.visible = false
-	add_child(_beam)
-
 func _process(delta: float) -> void:
 	if _beacon != null:
 		_beacon_t += delta
@@ -152,16 +132,11 @@ func _process(delta: float) -> void:
 		_ring.position = Vector3(tok.position.x, TILE_H + 0.04, tok.position.z)
 		var s := 1.0 + sin(_ring_t * 4.5) * 0.09
 		_ring.scale = Vector3(s, 1.0, s)
-		if _beam != null:
-			_beam.position = Vector3(tok.position.x, TILE_H + 2.7, tok.position.z)
-			_beam.rotation.y = _ring_t * 0.8
 
 func set_active(p) -> void:
 	_active_id = p.id
 	if _ring != null:
 		_ring.visible = true
-	if _beam != null:
-		_beam.visible = true
 
 func token_pos(p) -> Vector3:
 	return _tokens[p.id].position
@@ -183,20 +158,28 @@ func _build_monster_crowd() -> void:
 	# Monstruos bailando alrededor del tablero (variedad: no solo zombies).
 	var crowd := ["cyclops", "bee", "ghost", "crab", "demon", "penguin", "skull", "panda", "bat", "mushroom"]
 	var cols := [Brand.RED, Brand.GOLD, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[2], Brand.GROUP[3], Brand.GROUP[5], Brand.WHITE, Brand.GROUP[4], Brand.GOLD_HI]
-	var r := _outer + 2.2
+	var r := _outer + 2.4
 	for i in crowd.size():
-		var ang := float(i) / float(crowd.size()) * TAU + 0.39
-		var cx := cos(ang)
-		var cz := sin(ang)
-		var mc := maxf(absf(cx), absf(cz))  # proyecta al borde de un CUADRADO (el tablero es cuadrado)
-		var pos := Vector3(cx / mc * r, 0, cz / mc * r)
+		var f := (float(i) + 0.5) / float(crowd.size())  # repartidos parejos por el perímetro cuadrado
+		var pos := _square_ring_point(f, r)
 		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "dance")
 		if m == null:
 			continue
-		m.scale = Vector3(2.3, 2.3, 2.3)
+		m.scale = Vector3(2.2, 2.2, 2.2)
 		m.position = pos
 		m.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
 		add_child(m)
+
+func _square_ring_point(f: float, r: float) -> Vector3:
+	# Punto repartido uniforme sobre el borde de un cuadrado de semilado r.
+	var seg := fmod(f, 1.0) * 4.0
+	var side := int(seg)
+	var u := lerpf(-r, r, seg - float(side))
+	match side:
+		0: return Vector3(u, 0, -r)
+		1: return Vector3(r, 0, u)
+		2: return Vector3(-u, 0, r)
+		_: return Vector3(-r, 0, -u)
 
 func _build_diorama() -> void:
 	# Mini "ciudad de software" baja, en fila al FONDO del centro (no tapa el logo).
@@ -511,10 +494,9 @@ func set_houses(idx: int, count: int, color: Color) -> void:
 	var along := inward.cross(Vector3.UP).normalized()
 	var center := _tile_pos(idx) - inward * (CORNER * 0.24) + Vector3(0, TILE_H, 0)
 
-	var flag := _make_flag(color)
-	flag.position = _tile_pos(idx) - inward * (CORNER * 0.36) + along * (CORNER * 0.32) + Vector3(0, TILE_H, 0)
-	holder.add_child(flag)
-	_pop(flag)
+	# cimiento (terreno aplanado) con borde del color del dueño
+	holder.add_child(_part(_box(SIDEW * 0.88, 0.035, CORNER * 0.58), _emissive(color, 0.7), center + Vector3(0, -0.035, 0)))
+	holder.add_child(_part(_box(SIDEW * 0.78, 0.05, CORNER * 0.5), _mat(Color(0.22, 0.21, 0.19)), center + Vector3(0, -0.01, 0)))
 
 	if count >= 5:
 		# CI/CD → rascacielos
@@ -522,13 +504,17 @@ func set_houses(idx: int, count: int, color: Color) -> void:
 		hotel.position = center
 		holder.add_child(hotel)
 		_pop(hotel)
+		_dust_puff(center)
 	elif count >= 1:
 		# cobertura → un edificio que crece (small → big) con cada nivel
 		var b := _load_model(CITY + "building-c.glb", 0.35 + count * 0.16)
 		b.position = center
 		holder.add_child(b)
 		_pop(b)
-	_dust_puff(center)
+		_dust_puff(center)
+	else:
+		# recién comprado: un tractor aplana el terreno
+		_tractor_pass(holder, center, along)
 
 func _dust_puff(pos: Vector3) -> void:
 	# Estallido de polvo al construir.
@@ -557,6 +543,34 @@ func _dust_puff(pos: Vector3) -> void:
 	p.mesh = sm
 	add_child(p)
 	p.finished.connect(p.queue_free)
+
+func _tractor_pass(holder: Node3D, center: Vector3, along: Vector3) -> void:
+	# Tractor que cruza el lote aplanando el terreno (al comprar).
+	var t := _make_tractor()
+	var d := CORNER * 0.32
+	t.position = center + along * d + Vector3(0, 0.05, 0)
+	t.rotation.y = atan2(-along.x, -along.z)  # el frente (+Z) lidera
+	holder.add_child(t)
+	_dust_puff(center)
+	var tw := create_tween()
+	tw.tween_property(t, "position", center - along * d + Vector3(0, 0.05, 0), 1.1).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(t, "scale", Vector3.ZERO, 0.3).set_ease(Tween.EASE_IN)
+	tw.tween_callback(t.queue_free)
+
+func _make_tractor() -> Node3D:
+	var n := Node3D.new()
+	var yellow := _glossy(Color(0.95, 0.78, 0.12))
+	var dark := _mat(Color(0.14, 0.13, 0.12))
+	n.add_child(_part(_box(0.46, 0.26, 0.5), yellow, Vector3(0, 0.24, -0.02)))   # cuerpo
+	n.add_child(_part(_box(0.34, 0.24, 0.30), yellow, Vector3(0, 0.46, -0.12)))  # cabina (atrás)
+	n.add_child(_part(_box(0.52, 0.26, 0.07), dark, Vector3(0, 0.18, 0.31)))     # pala (al frente +Z)
+	for sz in [0.18, -0.16]:
+		var wr: float = 0.13 if sz > 0 else 0.18  # delanteras chicas, traseras grandes
+		for sx in [-0.27, 0.27]:
+			var w := _part(_cyl(wr, wr, 0.09), dark, Vector3(sx, wr, sz))
+			w.rotation_degrees = Vector3(0, 0, 90)
+			n.add_child(w)
+	return n
 
 func _make_flag(color: Color) -> Node3D:
 	var n := Node3D.new()
@@ -669,8 +683,8 @@ func _bill_style(value: int) -> Array:
 		10: return [Color.html("#c4c4c4"), Color.html("#2f2f2f")]
 		50: return [Color.html("#a8cdee"), Color.html("#143f6b")]
 		100: return [Color.html("#a6d4b2"), Color.html("#155a2e")]
-		500: return [Color.html("#f0c98a"), Color.html("#8a4e0a")]
-		_: return [Color.html("#f2dd80"), Color.html("#7a6208")]
+		500: return [Color.html("#f0b85a"), Color.html("#7a4408")]
+		_: return [Color.html("#f0c419"), Color.html("#5c4a00")]
 
 # ---------- juice / pulido ----------
 
