@@ -24,6 +24,7 @@ func _ready() -> void:
 	_build_vignette()
 	_build_title()
 	_build_main_menu()
+	_build_props()
 	_animate_in()
 
 func _build_background() -> void:
@@ -385,6 +386,142 @@ func _bg_load_char(name: String) -> Node3D:
 				ap.play(a)
 				break
 	return holder
+
+func _build_props() -> void:
+	# Baraja (Bug/Retro) + billete QA Credits como props a la derecha, con balanceo.
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(root)
+
+	var retro := _prop_card("RETRO", Color.html("#2E6FB0"), Brand.WHITE, Color.html("#bcd8f2"), "SACA · APRENDE")
+	retro.position = Vector2(900, 350)
+	retro.pivot_offset = retro.custom_minimum_size * 0.5
+	retro.rotation = deg_to_rad(-8)
+	root.add_child(retro)
+	_sway(retro, 11.0, 3.4)
+
+	var bug := _prop_card("BUG", Color.html("#E08A1E"), Color.html("#14110E"), Color.html("#5e3708"), "REPORT")
+	bug.position = Vector2(1024, 384)
+	bug.pivot_offset = bug.custom_minimum_size * 0.5
+	bug.rotation = deg_to_rad(7)
+	root.add_child(bug)
+	_sway(bug, 13.0, 4.1)
+
+	var bill := _prop_bill()
+	bill.position = Vector2(902, 566)
+	bill.pivot_offset = bill.custom_minimum_size * 0.5
+	bill.rotation = deg_to_rad(-3)
+	root.add_child(bill)
+	_sway(bill, 8.0, 4.7)
+
+	root.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_interval(0.55)
+	tw.tween_property(root, "modulate:a", 1.0, 0.5)
+
+func _prop_card(title: String, base: Color, ink: Color, kicker_col: Color, sub: String) -> Control:
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(162, 224)
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = base
+	sb.set_corner_radius_all(14)
+	sb.border_color = Color(0, 0, 0, 0.42)
+	sb.set_border_width_all(2)
+	sb.shadow_color = Color(0, 0, 0, 0.5)
+	sb.shadow_size = 16
+	sb.set_content_margin_all(12)
+	card.add_theme_stylebox_override("panel", sb)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 2)
+	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(vb)
+	var k := Label.new()
+	k.text = "BUGOPOLY · MAZO"
+	k.add_theme_font_override("font", Brand.font_heavy())
+	k.add_theme_font_size_override("font_size", 9)
+	k.add_theme_color_override("font_color", kicker_col)
+	k.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(k)
+	var s1 := Control.new()
+	s1.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vb.add_child(s1)
+	var tl := Label.new()
+	tl.text = title
+	tl.add_theme_font_override("font", Brand.font_display())
+	tl.add_theme_font_size_override("font_size", 44)
+	tl.add_theme_color_override("font_color", ink)
+	tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(tl)
+	var sl := Label.new()
+	sl.text = sub
+	sl.add_theme_font_override("font", Brand.font_heavy())
+	sl.add_theme_font_size_override("font_size", 11)
+	sl.add_theme_color_override("font_color", kicker_col)
+	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(sl)
+	var s2 := Control.new()
+	s2.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vb.add_child(s2)
+	return card
+
+func _prop_bill() -> Control:
+	var bill := PanelContainer.new()
+	bill.custom_minimum_size = Vector2(236, 108)
+	bill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Brand.CREAM
+	sb.set_corner_radius_all(10)
+	sb.border_color = Brand.GOLD
+	sb.set_border_width_all(2)
+	sb.shadow_color = Color(0, 0, 0, 0.45)
+	sb.shadow_size = 14
+	sb.set_content_margin_all(12)
+	bill.add_theme_stylebox_override("panel", sb)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 8)
+	hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bill.add_child(hb)
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_theme_constant_override("separation", 0)
+	hb.add_child(left)
+	var nm := Label.new()
+	nm.text = "BUGOPOLY"
+	nm.add_theme_font_override("font", Brand.font_display())
+	nm.add_theme_font_size_override("font_size", 14)
+	nm.add_theme_color_override("font_color", Brand.RED)
+	left.add_child(nm)
+	var val := Label.new()
+	val.text = "1000"
+	val.add_theme_font_override("font", Brand.font_display())
+	val.add_theme_font_size_override("font_size", 36)
+	val.add_theme_color_override("font_color", Color.html("#8a6f08"))
+	left.add_child(val)
+	var cr := Label.new()
+	cr.text = "QA CREDITS"
+	cr.add_theme_font_override("font", Brand.font_heavy())
+	cr.add_theme_font_size_override("font_size", 11)
+	cr.add_theme_color_override("font_color", Color.html("#8a6f08"))
+	left.add_child(cr)
+	var seal := Panel.new()
+	seal.custom_minimum_size = Vector2(66, 66)
+	seal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var ssb := StyleBoxFlat.new()
+	ssb.bg_color = Color(Brand.GOLD.r, Brand.GOLD.g, Brand.GOLD.b, 0.26)
+	ssb.set_corner_radius_all(33)
+	ssb.border_color = Color.html("#8a6f08")
+	ssb.set_border_width_all(2)
+	seal.add_theme_stylebox_override("panel", ssb)
+	hb.add_child(seal)
+	return bill
+
+func _sway(c: Control, amp: float, dur: float) -> void:
+	var y0 := c.position.y
+	var tw := create_tween().set_loops()
+	tw.tween_property(c, "position:y", y0 - amp, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(c, "position:y", y0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _build_vignette() -> void:
 	# Velo oscuro radial sobre la escena (la UI se lee mejor).
