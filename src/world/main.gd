@@ -56,7 +56,7 @@ func _setup_world() -> void:
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 1.0
+	env.ambient_light_energy = 0.8
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = 1.35
 	env.ssao_enabled = false  # SSAO no está soportado en el renderer Mobile
@@ -65,15 +65,15 @@ func _setup_world() -> void:
 	env.glow_bloom = 0.0
 	env.glow_hdr_threshold = 1.4
 	env.adjustment_enabled = true
-	env.adjustment_brightness = 1.08
-	env.adjustment_saturation = 1.12
-	env.adjustment_contrast = 1.05
+	env.adjustment_brightness = 1.0
+	env.adjustment_saturation = 1.1
+	env.adjustment_contrast = 1.08
 	we.environment = env
 	add_child(we)
 
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-52, -40, 0)
-	light.light_energy = 1.5
+	light.light_energy = 1.3
 	light.shadow_enabled = true
 	light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	light.light_angular_distance = 1.2
@@ -83,7 +83,7 @@ func _setup_world() -> void:
 	# Relleno frío suave (da volumen sin aplanar las sombras).
 	var fill := DirectionalLight3D.new()
 	fill.rotation_degrees = Vector3(-22, 135, 0)
-	fill.light_energy = 0.5
+	fill.light_energy = 0.4
 	fill.light_color = Color(0.72, 0.82, 1.0)
 	add_child(fill)
 

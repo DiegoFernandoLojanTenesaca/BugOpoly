@@ -183,10 +183,13 @@ func _build_monster_crowd() -> void:
 	# Monstruos bailando alrededor del tablero (variedad: no solo zombies).
 	var crowd := ["cyclops", "bee", "ghost", "crab", "demon", "penguin", "skull", "panda", "bat", "mushroom"]
 	var cols := [Brand.RED, Brand.GOLD, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[2], Brand.GROUP[3], Brand.GROUP[5], Brand.WHITE, Brand.GROUP[4], Brand.GOLD_HI]
-	var r := _outer + 2.6
+	var r := _outer + 2.2
 	for i in crowd.size():
 		var ang := float(i) / float(crowd.size()) * TAU + 0.39
-		var pos := Vector3(cos(ang) * r, 0, sin(ang) * r)
+		var cx := cos(ang)
+		var cz := sin(ang)
+		var mc := maxf(absf(cx), absf(cz))  # proyecta al borde de un CUADRADO (el tablero es cuadrado)
+		var pos := Vector3(cx / mc * r, 0, cz / mc * r)
 		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "dance")
 		if m == null:
 			continue
@@ -601,7 +604,7 @@ func _make_bill(value: int = 100) -> Node3D:
 	fmat.albedo_texture = _bill_tex(value)
 	fmat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	fmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	fmat.roughness = 0.85
+	fmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	face.material_override = fmat
 	n.add_child(face)
 	var val := Label3D.new()
@@ -663,11 +666,11 @@ func _bill_svg(value: int) -> String:
 
 func _bill_style(value: int) -> Array:
 	match value:
-		10: return [Color.html("#eceae4"), Color.html("#4f4f4f")]
-		50: return [Color.html("#dce8f4"), Color.html("#1f5286")]
-		100: return [Color.html("#dcecdf"), Color.html("#1a5e30")]
-		500: return [Color.html("#f6e7cf"), Color.html("#a5620f")]
-		_: return [Color.html("#fbf1c9"), Color.html("#8a6f08")]
+		10: return [Color.html("#c4c4c4"), Color.html("#2f2f2f")]
+		50: return [Color.html("#a8cdee"), Color.html("#143f6b")]
+		100: return [Color.html("#a6d4b2"), Color.html("#155a2e")]
+		500: return [Color.html("#f0c98a"), Color.html("#8a4e0a")]
+		_: return [Color.html("#f2dd80"), Color.html("#7a6208")]
 
 # ---------- juice / pulido ----------
 
