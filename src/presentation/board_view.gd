@@ -183,14 +183,14 @@ func _build_monster_crowd() -> void:
 	# Monstruos bailando alrededor del tablero (variedad: no solo zombies).
 	var crowd := ["cyclops", "bee", "ghost", "crab", "demon", "penguin", "skull", "panda", "bat", "mushroom"]
 	var cols := [Brand.RED, Brand.GOLD, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[2], Brand.GROUP[3], Brand.GROUP[5], Brand.WHITE, Brand.GROUP[4], Brand.GOLD_HI]
-	var r := _outer + 1.4
+	var r := _outer + 3.4
 	for i in crowd.size():
 		var ang := float(i) / float(crowd.size()) * TAU + 0.39
 		var pos := Vector3(cos(ang) * r, 0, sin(ang) * r)
 		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "dance")
 		if m == null:
 			continue
-		m.scale = Vector3(2.6, 2.6, 2.6)
+		m.scale = Vector3(2.3, 2.3, 2.3)
 		m.position = pos
 		m.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
 		add_child(m)
@@ -351,13 +351,18 @@ func _build_tile(i: int, tile: Dictionary) -> void:
 		price_l.rotation_degrees = Vector3(-90, side * 90.0, 0)
 		add_child(price_l)
 
-	if not corner and t != "property":
+	if not corner:
 		_tile_icon(t, tile, pos, side, inward, dark)
 
 	if corner:
 		_corner_accent(t, pos)
 
 const ICONS := "res://assets/bugopoly/icons/%s.svg"
+const SUB_ICON := {
+	"frontend": "terminal", "backend": "server", "database": "database",
+	"auth": "lock", "payments": "credit-card", "mobile": "search",
+	"analytics": "search", "infra": "server", "pipeline": "git-branch", "cloud": "server",
+}
 
 func _icon_tex(name: String, col: Color) -> Texture2D:
 	var path := ICONS % name
@@ -371,22 +376,31 @@ func _icon_tex(name: String, col: Color) -> Texture2D:
 
 func _tile_icon(type: String, tile: Dictionary, pos: Vector3, side: int, inward: Vector3, dark: bool) -> void:
 	var name := ""
+	var prop := type == "property"
 	match type:
 		"incident": name = "alert"
 		"challenge": name = "search"
 		"tax": name = "credit-card"
 		"coffee": name = "coffee"
 		"card": name = "bug" if "bug" in str(tile.get("deck", "")) else "refresh"
+		"property": name = str(SUB_ICON.get(str(tile.get("subsystem", "")).split(":")[-1], ""))
 	if name == "":
 		return
-	var tex := _icon_tex(name, Color(0.97, 0.95, 0.90) if dark else Color(0.13, 0.10, 0.07))
+	var col := Color(0.97, 0.95, 0.90)
+	if not prop and not dark:
+		col = Color(0.13, 0.10, 0.07)
+	var tex := _icon_tex(name, col)
 	if tex == null:
 		return
 	var spr := Sprite3D.new()
 	spr.texture = tex
-	spr.pixel_size = 0.0055
 	spr.rotation_degrees = Vector3(-90, side * 90.0, 0)
-	spr.position = pos - inward * (CORNER * 0.30) + Vector3(0, TILE_H + 0.09, 0)
+	if prop:
+		spr.pixel_size = 0.0040
+		spr.position = pos + inward * (CORNER * 0.37) + Vector3(0, TILE_H + 0.07, 0)
+	else:
+		spr.pixel_size = 0.0055
+		spr.position = pos - inward * (CORNER * 0.30) + Vector3(0, TILE_H + 0.09, 0)
 	add_child(spr)
 
 func tile_world(idx: int) -> Vector3:
@@ -511,6 +525,35 @@ func set_houses(idx: int, count: int, color: Color) -> void:
 		b.position = center
 		holder.add_child(b)
 		_pop(b)
+	_dust_puff(center)
+
+func _dust_puff(pos: Vector3) -> void:
+	# Estallido de polvo al construir.
+	var p := CPUParticles3D.new()
+	p.position = pos
+	p.emitting = true
+	p.one_shot = true
+	p.amount = 20
+	p.lifetime = 0.7
+	p.explosiveness = 0.92
+	p.direction = Vector3(0, 1, 0)
+	p.spread = 75.0
+	p.initial_velocity_min = 1.2
+	p.initial_velocity_max = 2.8
+	p.gravity = Vector3(0, -3.0, 0)
+	p.scale_amount_min = 0.10
+	p.scale_amount_max = 0.24
+	var sm := SphereMesh.new()
+	sm.radius = 0.12
+	sm.height = 0.24
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.80, 0.75, 0.64, 0.85)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	sm.material = mat
+	p.mesh = sm
+	add_child(p)
+	p.finished.connect(p.queue_free)
 
 func _make_flag(color: Color) -> Node3D:
 	var n := Node3D.new()
@@ -543,26 +586,78 @@ func fly_bills(from: Vector3, to: Vector3, count: int) -> void:
 		tw.parallel().tween_property(bill, "scale", Vector3.ZERO, 0.5)
 		tw.tween_callback(bill.queue_free)
 
+var _bill_tex_cache: Dictionary = {}
+
 func _make_bill(value: int = 100) -> Node3D:
-	# Billete QA Credits con denominación (paleta del kit por valor).
-	var st := _bill_style(value)
-	var paper: Color = st[0]
-	var ink: Color = st[1]
+	# Billete QA Credits: cara texturizada (SVG) + textos 3D (thorvg no dibuja fuentes).
+	var ink: Color = _bill_style(value)[1]
 	var n := Node3D.new()
-	n.add_child(_part(_box(1.15, 0.03, 0.6), _mat(paper), Vector3.ZERO))
-	n.add_child(_part(_box(1.02, 0.032, 0.48), _mat(Color(ink.r, ink.g, ink.b, 0.16)), Vector3(0, 0.002, 0)))
-	n.add_child(_part(_box(0.2, 0.034, 0.2), _mat(ink), Vector3(0.38, 0.006, 0)))
-	var lbl := Label3D.new()
-	lbl.text = str(value)
-	lbl.font = Brand.font_display()
-	lbl.font_size = 64
-	lbl.pixel_size = 0.0055
-	lbl.modulate = ink
-	lbl.position = Vector3(-0.1, 0.02, 0)
-	lbl.rotation_degrees = Vector3(-90, 0, 0)
-	n.add_child(lbl)
+	var face := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1.5, 0.82)
+	face.mesh = qm
+	face.rotation_degrees = Vector3(-90, 0, 0)
+	var fmat := StandardMaterial3D.new()
+	fmat.albedo_texture = _bill_tex(value)
+	fmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	fmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fmat.roughness = 0.85
+	face.material_override = fmat
+	n.add_child(face)
+	var val := Label3D.new()
+	val.text = str(value)
+	val.font = Brand.font_display()
+	val.font_size = 56
+	val.pixel_size = 0.0050
+	val.modulate = ink
+	val.position = Vector3(-0.34, 0.012, 0.12)
+	val.rotation_degrees = Vector3(-90, 0, 0)
+	n.add_child(val)
+	var cr := Label3D.new()
+	cr.text = "QA CREDITS"
+	cr.font = Brand.font_heavy()
+	cr.font_size = 22
+	cr.pixel_size = 0.0040
+	cr.modulate = ink
+	cr.position = Vector3(-0.32, 0.012, 0.28)
+	cr.rotation_degrees = Vector3(-90, 0, 0)
+	n.add_child(cr)
 	n.rotation_degrees = Vector3(0, randf() * 360.0, 0)
 	return n
+
+func _bill_tex(value: int) -> Texture2D:
+	if _bill_tex_cache.has(value):
+		return _bill_tex_cache[value]
+	var img := Image.new()
+	var tex: Texture2D = null
+	if img.load_svg_from_string(_bill_svg(value), 1.4) == OK:
+		tex = ImageTexture.create_from_image(img)
+	_bill_tex_cache[value] = tex
+	return tex
+
+func _bill_svg(value: int) -> String:
+	var st := _bill_style(value)
+	var ph := "#" + st[0].to_html(false)
+	var ih := "#" + st[1].to_html(false)
+	var lite := "#" + st[0].lightened(0.4).to_html(false)
+	var icons := {
+		10: '<circle cx="12" cy="12" r="7"/><path d="M22 22 17 17"/>',
+		50: '<ellipse cx="12" cy="13.5" rx="5" ry="6"/><circle cx="12" cy="6" r="2.1"/><path d="M12 8v11"/><path d="M10.3 4.4 8.6 2.6M13.7 4.4 15.4 2.6"/>',
+		100: '<path d="M4 12.5 9.5 18 20 6.5"/>',
+		500: '<circle cx="12" cy="12" r="3.4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>',
+	}
+	var icon: String = icons.get(value, '<path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 5.5H5.2v1.5a3 3 0 0 0 3 3"/><path d="M16 5.5h2.8v1.5a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20h6"/><path d="M9.8 16.5h4.4v3.5H9.8z"/>')
+	var s := '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" width="360" height="200">'
+	s += '<rect x="3" y="3" width="354" height="194" rx="16" fill="' + ph + '"/>'
+	s += '<rect x="3" y="3" width="354" height="118" rx="16" fill="' + lite + '" fill-opacity="0.5"/>'
+	s += '<rect x="11" y="11" width="338" height="178" rx="11" fill="none" stroke="' + ih + '" stroke-width="3" opacity="0.85"/>'
+	s += '<rect x="17" y="17" width="326" height="166" rx="7" fill="none" stroke="' + ih + '" stroke-width="1.5" opacity="0.5"/>'
+	s += '<g fill="none" stroke="' + ih + '" stroke-width="1.2" opacity="0.16"><circle cx="78" cy="100" r="48"/><circle cx="78" cy="100" r="38"/><circle cx="78" cy="100" r="28"/><circle cx="78" cy="100" r="18"/></g>'
+	s += '<circle cx="286" cy="100" r="44" fill="none" stroke="' + ih + '" stroke-width="2.5" opacity="0.85"/>'
+	s += '<circle cx="286" cy="100" r="51" fill="none" stroke="' + ih + '" stroke-width="1" opacity="0.5"/>'
+	s += '<g transform="translate(257,71) scale(2.4)" fill="none" stroke="' + ih + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icon + '</g>'
+	s += '</svg>'
+	return s
 
 func _bill_style(value: int) -> Array:
 	match value:

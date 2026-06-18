@@ -24,7 +24,7 @@ func build(board_half: float) -> void:
 	_fight("sam", "Slash", "zombie_chubby", "Attack", Vector3(bh + 7.0, 0, bz - 2.0))
 	_runner(_load_char("pug", "Run", 3.0), bz - 3.0, 0.9, 1.5, bh + 12.0)
 	# espectadores haciendo algo (saludan, asienten, pelean), enmarcando el tablero
-	var bh2 := bh + 2.9
+	var bh2 := bh + 4.4
 	_spectator("sam", "Wave", Vector3(-bh2, 0, 3.0))
 	_spectator("shaun", "Yes", Vector3(bh2, 0, -2.0))
 	_spectator("zombie_basic", "Idle_Attack", Vector3(-3.5, 0, -bh2))

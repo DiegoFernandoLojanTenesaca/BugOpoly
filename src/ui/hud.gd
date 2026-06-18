@@ -7,6 +7,18 @@ const SUB_ICON := {
 	"auth": "lock", "payments": "credit-card", "mobile": "search",
 	"analytics": "search", "infra": "server", "pipeline": "git-branch", "cloud": "server",
 }
+const SUB_BLURB := {
+	"frontend": "UI/UX · bugs visuales y de estado",
+	"backend": "APIs y lógica · race conditions, 500s",
+	"database": "datos y queries · integridad, migraciones",
+	"auth": "login y permisos · tokens, sesiones, 2FA",
+	"payments": "cobros · idempotencia y reconciliación",
+	"mobile": "app móvil · offline y permisos",
+	"analytics": "métricas · eventos y embudos",
+	"infra": "servidores y red · escala y caídas",
+	"pipeline": "CI/CD · builds verdes y despliegues",
+	"cloud": "nube · costos y disponibilidad",
+}
 
 signal roll_pressed
 signal property_decision(buy)
@@ -272,6 +284,7 @@ func _make_card(p) -> Control:
 func show_property(tile: Dictionary, can_afford: bool) -> void:
 	_clear_popup()
 	var sub := Registry.get_def("subsystem", str(tile.get("subsystem", "")))
+	var sub_key := str(tile.get("subsystem", "")).split(":")[-1]
 	var col := Color.html(str(sub.get("color", "#888888")))
 	var price := int(tile.get("price", 0))
 	var base := int(tile.get("rent", int(price * 0.1)))
@@ -309,7 +322,7 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	var bandh := HBoxContainer.new()
 	bandh.add_theme_constant_override("separation", 10)
 	bandh.add_child(bandv)
-	bandh.add_child(_deed_icon(str(SUB_ICON.get(str(tile.get("subsystem", "")), "gear")), Color(1, 1, 1, 0.88), 36))
+	bandh.add_child(_deed_icon(str(SUB_ICON.get(sub_key, "gear")), Color(1, 1, 1, 0.88), 36))
 	band.add_child(bandh)
 	deed.add_child(band)
 
@@ -329,6 +342,15 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	body.add_theme_stylebox_override("panel", ysb)
 	var bv := VBoxContainer.new()
 	bv.add_theme_constant_override("separation", 5)
+	var blurb := Label.new()
+	blurb.text = str(SUB_BLURB.get(sub_key, "módulo de software"))
+	blurb.add_theme_font_size_override("font_size", 12)
+	blurb.add_theme_color_override("font_color", col.darkened(0.12))
+	blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	blurb.custom_minimum_size = Vector2(430, 0)
+	bv.add_child(blurb)
+	bv.add_child(HSeparator.new())
 	bv.add_child(_deed_row("RENTA", "$%d" % base, true))
 	var mult := [2.0, 3.0, 4.5, 6.0]
 	for i in 4:
