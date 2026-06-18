@@ -10,6 +10,7 @@ var _rows: Array = []
 var _list: VBoxContainer
 var _add_btn: Button
 var _title: Label
+var _title_parts: Array = []
 var _sub: Label
 var _menu: VBoxContainer
 var _players_overlay: Control = null
@@ -60,20 +61,21 @@ func _build_background() -> void:
 	gtw.tween_property(tex, "fill_from", Vector2(0.6, 0.46), 7.0).set_trans(Tween.TRANS_SINE)
 
 func _build_title() -> void:
-	var holder := Control.new()
-	_title = holder
-	holder.position = Vector2(54, 24)
-	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(holder)
-	# extrude 3D: capas rojas oscuras desplazadas detrás del wordmark
+	_title_parts.clear()
+	var base := Vector2(54, 24)
+	# extrude 3D: capas rojas oscuras desplazadas detrás del wordmark (a self, no a un holder)
 	for layer in [[Vector2(8, 10), Color("2a0a09")], [Vector2(6, 7), Color("3a0e0c")], [Vector2(4, 5), Color("5c1614")], [Vector2(2, 2), Color("7a1f1d")]]:
 		var sh := _wordmark(layer[1])
-		sh.position = layer[0]
-		holder.add_child(sh)
+		sh.position = base + layer[0]
+		add_child(sh)
+		_title_parts.append(sh)
 	var main := _wordmark(Brand.RED)
 	main.add_theme_constant_override("outline_size", 10)
 	main.add_theme_color_override("font_outline_color", Color("1c0807"))
-	holder.add_child(main)
+	main.position = base
+	add_child(main)
+	_title = main
+	_title_parts.append(main)
 
 	var sub := Label.new()
 	_sub = sub
@@ -360,15 +362,19 @@ func _build_scene() -> void:
 	pmat.roughness = 0.9
 	plat.material_override = pmat
 	vp.add_child(plat)
-	# monstruos parados que giran
+	# monstruos parados mirando a la cámara (idle, sin girar)
 	var bv := BoardView.new()
 	var spots := [["cyclops", Vector3(-2.0, 0, 1.3)], ["ghost", Vector3(2.1, 0, -0.2)], ["demon", Vector3(-0.2, 0, -2.0)]]
+	var mi := 0
 	for sp in spots:
 		var m: Node3D = bv._load_piece_model(sp[0], Brand.RED, false)
 		if m != null:
-			m.position = sp[1]
+			var pos: Vector3 = sp[1]
+			m.position = pos
 			vp.add_child(m)
-			_scene_mons.append(m)
+			m.look_at(Vector3(0, pos.y, 9.0), Vector3.UP)
+			_scene_mons.append({"node": m, "y0": pos.y, "phase": float(mi) * 1.3})
+		mi += 1
 	bv.free()
 
 	# persecución corriendo detrás del tablero
@@ -565,9 +571,9 @@ func _build_vignette() -> void:
 
 func _process(delta: float) -> void:
 	_scene_t += delta
-	for m in _scene_mons:
-		var mm: Node3D = m
-		mm.rotation.y += delta * 0.7
+	for entry in _scene_mons:
+		var mm: Node3D = entry["node"]
+		mm.position.y = entry["y0"] + sin(_scene_t * 1.6 + entry["phase"]) * 0.12
 	for ru in _scene_runners:
 		var rn: Node3D = ru["node"]
 		var ph: float = _scene_t * 0.7 + ru["phase"]
@@ -598,26 +604,20 @@ func _build_ambient() -> void:
 		tw.tween_property(dot, "position:y", y0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _animate_in() -> void:
-	_title.modulate.a = 0.0
-	_title.position.x = 18
+	for p in _title_parts:
+		p.modulate.a = 0.0
 	_sub.modulate.a = 0.0
 	_menu.modulate.a = 0.0
 	_menu.position.x = 24
 
 	var t := create_tween()
 	t.tween_interval(0.15)
-	t.tween_property(_title, "position:x", 54, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	t.parallel().tween_property(_title, "modulate:a", 1.0, 0.4)
-	t.tween_property(_sub, "modulate:a", 1.0, 0.35)
+	t.tween_property(_title_parts[0], "modulate:a", 1.0, 0.45)
+	for i in range(1, _title_parts.size()):
+		t.parallel().tween_property(_title_parts[i], "modulate:a", 1.0, 0.45)
+	t.parallel().tween_property(_sub, "modulate:a", 1.0, 0.45)
 	t.tween_property(_menu, "position:x", 60, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	t.parallel().tween_property(_menu, "modulate:a", 1.0, 0.45)
-	t.tween_callback(_idle_title)
-
-func _idle_title() -> void:
-	_title.pivot_offset = Vector2(0, 48)
-	var t := create_tween().set_loops()
-	t.tween_property(_title, "scale", Vector2(1.02, 1.02), 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	t.tween_property(_title, "scale", Vector2.ONE, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _scale_to(ctrl: Control, s: float) -> void:
 	create_tween().tween_property(ctrl, "scale", Vector2(s, s), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

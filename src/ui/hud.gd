@@ -279,7 +279,7 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	# ---- Escritura / title deed estilo juego de mesa ----
 	var deed := VBoxContainer.new()
 	deed.add_theme_constant_override("separation", 0)
-	deed.custom_minimum_size = Vector2(440, 0)
+	deed.custom_minimum_size = Vector2(486, 0)
 
 	var band := PanelContainer.new()
 	var bsb := StyleBoxFlat.new()
@@ -303,7 +303,7 @@ func show_property(tile: Dictionary, can_afford: bool) -> void:
 	var nm := Label.new()
 	nm.text = str(tile.get("name", "Propiedad")).to_upper()
 	nm.add_theme_font_override("font", Brand.font_display())
-	nm.add_theme_font_size_override("font_size", 24)
+	nm.add_theme_font_size_override("font_size", 28)
 	nm.add_theme_color_override("font_color", Brand.WHITE)
 	bandv.add_child(nm)
 	var bandh := HBoxContainer.new()
