@@ -318,10 +318,10 @@ func _icon_tex(name: String, col: Color) -> Texture2D:
 func _tile_icon(type: String, tile: Dictionary, pos: Vector3, side: int, inward: Vector3, dark: bool) -> void:
 	var name := ""
 	match type:
-		"incident": name = "bell"
+		"incident": name = "alert"
 		"challenge": name = "search"
 		"tax": name = "credit-card"
-		"coffee": name = "refresh"
+		"coffee": name = "coffee"
 		"card": name = "bug" if "bug" in str(tile.get("deck", "")) else "refresh"
 	if name == "":
 		return
