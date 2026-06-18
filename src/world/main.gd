@@ -328,6 +328,7 @@ func _resolve_property(p, tile: Dictionary) -> void:
 			board_view.burst_confetti(board_view.tile_world(idx), p.color)
 			_rig.shake(0.16)
 			AudioManager.play("buy")
+			AudioManager.play("win", -11.0)
 			_float(p, -price)
 			hud.log_line("%s compra %s (-$%d)." % [p.pname, tname, price])
 	elif owner == p.id:

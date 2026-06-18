@@ -41,7 +41,7 @@ func _spectator(name: String, anim: String, pos: Vector3) -> void:
 		return
 	n.position = pos
 	add_child(n)
-	n.look_at(Vector3(0, pos.y, 0), Vector3.UP)  # mira al tablero
+	n.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
 
 func _chase(survivor: String, zombie: String, z: float, speed: float, phase: float, range: float) -> void:
 	_runner(_load_char(survivor, "Run", 2.4), z, speed, phase, range)

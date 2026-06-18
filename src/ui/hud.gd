@@ -518,9 +518,10 @@ func show_card(kind: String, text: String) -> void:
 	sub_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vb.add_child(sub_l)
 
-	var spacer_mid := Control.new()
-	spacer_mid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vb.add_child(spacer_mid)
+	var icon_wrap := CenterContainer.new()
+	icon_wrap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	icon_wrap.add_child(_deed_icon("bug" if bug else "refresh", ink if bug else Brand.GOLD, 136))
+	vb.add_child(icon_wrap)
 
 	var body := PanelContainer.new()
 	var bsb := StyleBoxFlat.new()
@@ -540,15 +541,17 @@ func show_card(kind: String, text: String) -> void:
 	text_l.custom_minimum_size = Vector2(300, 0)
 	body.add_child(text_l)
 
-	# animación de entrada + auto-cierre
+	# animación: sale del mazo (esquina, chica) y viene grande al centro/pantalla
+	center.position = Vector2(330, 230)
 	card.pivot_offset = card.custom_minimum_size * 0.5
-	card.scale = Vector2(0.7, 0.7)
-	card.rotation = deg_to_rad(-5)
+	card.scale = Vector2(0.12, 0.12)
+	card.rotation = deg_to_rad(-14)
 	root.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_property(root, "modulate:a", 1.0, 0.18)
-	tw.parallel().tween_property(card, "scale", Vector2.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(card, "rotation", 0.0, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(center, "position", Vector2.ZERO, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(card, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(card, "rotation", 0.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_interval(2.3)
 	tw.tween_callback(_dismiss_card)
 

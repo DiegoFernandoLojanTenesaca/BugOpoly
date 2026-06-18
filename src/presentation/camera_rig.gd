@@ -14,6 +14,7 @@ var _dist := DIST_OVERVIEW
 var _t_center := Vector3.ZERO
 var _t_dist := DIST_OVERVIEW
 var _shake := 0.0
+var _orbit_t := 0.0
 
 func shake(amt := 0.2) -> void:
 	_shake = maxf(_shake, amt)
@@ -30,6 +31,11 @@ func _process(delta: float) -> void:
 	_center = _center.lerp(_t_center, k)
 	_dist = lerpf(_dist, _t_dist, k)
 	_shake = move_toward(_shake, 0.0, delta * 0.9)
+	# órbita lenta y sutil del tablero (da vida sin marear)
+	_orbit_t += delta
+	var az := sin(_orbit_t * 0.11) * 0.10
+	var cp := cos(deg_to_rad(PITCH))
+	_dir = Vector3(sin(az) * cp, sin(deg_to_rad(PITCH)), cos(az) * cp).normalized()
 	_apply()
 
 func _apply() -> void:

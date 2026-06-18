@@ -25,6 +25,7 @@ var _outer := 7.05
 var _tokens: Array = []
 var _owner_bars: Dictionary = {}
 var _ring: MeshInstance3D
+var _beam: MeshInstance3D
 var _radar: Node3D
 var _beacon: MeshInstance3D
 var _beacon_t := 0.0
@@ -101,6 +102,7 @@ func build(state) -> void:
 
 	_build_frame()
 	_build_decks()
+	_build_monster_crowd()
 
 	for p in state.players:
 		var tok := _make_token(p)
@@ -117,6 +119,26 @@ func build(state) -> void:
 	_ring.visible = false
 	add_child(_ring)
 
+	# haz de luz vertical sobre la ficha del turno
+	_beam = MeshInstance3D.new()
+	var beam_mesh := CylinderMesh.new()
+	beam_mesh.top_radius = 0.62
+	beam_mesh.bottom_radius = 0.08
+	beam_mesh.height = 5.2
+	_beam.mesh = beam_mesh
+	var bmat := StandardMaterial3D.new()
+	bmat.albedo_color = Color(1.0, 0.86, 0.34, 0.16)
+	bmat.emission_enabled = true
+	bmat.emission = Color(1.0, 0.82, 0.34)
+	bmat.emission_energy_multiplier = 1.4
+	bmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	bmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	bmat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+	_beam.material_override = bmat
+	_beam.visible = false
+	add_child(_beam)
+
 func _process(delta: float) -> void:
 	if _beacon != null:
 		_beacon_t += delta
@@ -130,11 +152,16 @@ func _process(delta: float) -> void:
 		_ring.position = Vector3(tok.position.x, TILE_H + 0.04, tok.position.z)
 		var s := 1.0 + sin(_ring_t * 4.5) * 0.09
 		_ring.scale = Vector3(s, 1.0, s)
+		if _beam != null:
+			_beam.position = Vector3(tok.position.x, TILE_H + 2.7, tok.position.z)
+			_beam.rotation.y = _ring_t * 0.8
 
 func set_active(p) -> void:
 	_active_id = p.id
 	if _ring != null:
 		_ring.visible = true
+	if _beam != null:
+		_beam.visible = true
 
 func token_pos(p) -> Vector3:
 	return _tokens[p.id].position
@@ -151,6 +178,22 @@ func _load_model(path: String, scale: float) -> Node3D:
 		root.add_child(ps.instantiate())
 		root.scale = Vector3(scale, scale, scale)
 	return root
+
+func _build_monster_crowd() -> void:
+	# Monstruos bailando alrededor del tablero (variedad: no solo zombies).
+	var crowd := ["cyclops", "bee", "ghost", "crab", "demon", "penguin", "skull", "panda", "bat", "mushroom"]
+	var cols := [Brand.RED, Brand.GOLD, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[2], Brand.GROUP[3], Brand.GROUP[5], Brand.WHITE, Brand.GROUP[4], Brand.GOLD_HI]
+	var r := _outer + 1.4
+	for i in crowd.size():
+		var ang := float(i) / float(crowd.size()) * TAU + 0.39
+		var pos := Vector3(cos(ang) * r, 0, sin(ang) * r)
+		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "dance")
+		if m == null:
+			continue
+		m.scale = Vector3(2.6, 2.6, 2.6)
+		m.position = pos
+		m.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
+		add_child(m)
 
 func _build_diorama() -> void:
 	# Mini "ciudad de software" baja, en fila al FONDO del centro (no tapa el logo).
@@ -284,11 +327,11 @@ func _build_tile(i: int, tile: Dictionary) -> void:
 	var label := Label3D.new()
 	label.text = str(tile.get("name", t))
 	label.font = Brand.font_heavy()
-	label.font_size = 58 if corner else 42
+	label.font_size = 66 if corner else 50
 	label.pixel_size = 0.0082
-	label.modulate = Color(0.97, 0.95, 0.90) if dark else Color(0.10, 0.08, 0.06)
-	label.outline_size = 16
-	label.outline_modulate = Color(0, 0, 0, 0.85) if dark else Color(1, 0.99, 0.95, 0.95)
+	label.modulate = Color(0.98, 0.96, 0.92) if dark else Color(0.08, 0.06, 0.05)
+	label.outline_size = 26
+	label.outline_modulate = Color(0, 0, 0, 0.9) if dark else Color(1, 0.99, 0.95, 0.98)
 	label.position = pos + inward * (CORNER * 0.06) + Vector3(0, TILE_H + 0.08, 0)
 	label.rotation_degrees = Vector3(-90, side * 90.0, 0)
 	label.width = 340 if corner else 200
@@ -663,7 +706,7 @@ func _make_token(p) -> Node3D:
 	root.add_child(_blob_shadow())
 	return root
 
-func _load_piece_model(shape: String, color: Color, with_pedestal := true) -> Node3D:
+func _load_piece_model(shape: String, color: Color, with_pedestal := true, anim := "idle") -> Node3D:
 	var inst: Node = null
 	# 1) si Godot lo tiene importado, usar la escena (rápido)
 	for ext in [".glb", ".gltf"]:
@@ -696,7 +739,7 @@ func _load_piece_model(shape: String, color: Color, with_pedestal := true) -> No
 		var list := ap.get_animation_list()
 		var pick := ""
 		for a in list:
-			if "idle" in str(a).to_lower():
+			if anim in str(a).to_lower():
 				pick = a
 				break
 		if pick == "" and not list.is_empty():
