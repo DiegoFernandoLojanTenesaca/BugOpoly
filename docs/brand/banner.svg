@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" font-family="'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif">
+  <defs>
+    <radialGradient id="glow" cx="78%" cy="22%" r="70%">
+      <stop offset="0%" stop-color="#F0C419" stop-opacity="0.20"/>
+      <stop offset="55%" stop-color="#F0C419" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#ffffff" stroke-opacity="0.03" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="360" rx="22" fill="#14110E"/>
+  <rect x="0" y="0" width="1200" height="360" rx="22" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="360" rx="22" fill="url(#glow)"/>
+
+  <!-- wordmark con extrude rojo -->
+  <g font-size="120" font-weight="900" letter-spacing="2">
+    <text x="68" y="178" fill="#2a0a09" transform="translate(8,10)">BUGOPOLY</text>
+    <text x="68" y="178" fill="#3a0e0c" transform="translate(6,8)">BUGOPOLY</text>
+    <text x="68" y="178" fill="#5c1614" transform="translate(4,6)">BUGOPOLY</text>
+    <text x="68" y="178" fill="#7a1f1d" transform="translate(2,3)">BUGOPOLY</text>
+    <text x="68" y="178" fill="#B3322F" stroke="#1c0807" stroke-width="2">BUGOPOLY</text>
+  </g>
+
+  <!-- acento + tagline -->
+  <rect x="70" y="216" width="58" height="4" rx="2" fill="#F0C419"/>
+  <text x="142" y="226" font-size="20" font-weight="700" letter-spacing="3" fill="#E6D9BD">CONSTRUÍ COBERTURA · SHIPEÁ EL RELEASE · CAZÁ LOS BUGS</text>
+
+  <!-- fila de iconos de marca -->
+  <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(70,272) scale(1.6)" stroke="#B3322F"><ellipse cx="12" cy="13.5" rx="5" ry="6"/><circle cx="12" cy="6" r="2.1"/><path d="M12 8v11"/><path d="M10.3 4.4 8.6 2.6M13.7 4.4 15.4 2.6"/><path d="M7 11 3.8 9M7 14 3.4 14M7 17 4 19M17 11 20.2 9M17 14 20.6 14M17 17 20 19"/></g>
+    <g transform="translate(150,272) scale(1.6)" stroke="#2E6FB0"><path d="M12 2c3 2.4 4.5 5.6 4.5 9 0 2-.9 3.8-2.4 5.3h-4.2C8.4 14.8 7.5 13 7.5 11c0-3.4 1.5-6.6 4.5-9Z"/><circle cx="12" cy="9" r="1.6"/><path d="M9.9 16.3 7.5 19.3l2.4-1M14.1 16.3l2.4 3-2.4-1"/><path d="M10.4 19.5 12 22.5l1.6-3"/></g>
+    <g transform="translate(230,272) scale(1.6)" stroke="#1F7A3D"><path d="M4 12.5 9.5 18 20 6.5"/></g>
+    <g transform="translate(310,272) scale(1.6)" stroke="#E08A1E"><path d="M5 8h12v5a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8Z"/><path d="M17 9.5h2.2a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/></g>
+    <g transform="translate(390,272) scale(1.6)" stroke="#7B3AA0"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 5.5H5.2v1.5a3 3 0 0 0 3 3"/><path d="M16 5.5h2.8v1.5a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20h6"/><path d="M9.8 16.5h4.4v3.5H9.8z"/></g>
+    <g transform="translate(470,272) scale(1.6)" stroke="#16A0A0"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.66 3.13 3 7 3s7-1.34 7-3V6"/><path d="M5 10v4c0 1.66 3.13 3 7 3s7-1.34 7-3v-4"/></g>
+  </g>
+
+  <!-- sello esquina -->
+  <text x="1130" y="332" font-size="13" font-weight="700" letter-spacing="2" fill="#6b6256" text-anchor="end">MARCA PROPIA · NO ES MONOPOLY</text>
+</svg>
