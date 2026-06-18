@@ -65,15 +65,34 @@ func build(state) -> void:
 	inner.material_override = _mat(Color("d2c3a0"))  # fieltro crema (tablero)
 	add_child(inner)
 
+	# Centro oscuro estilo kit: el logo y la ciudad van encima (no sobre crema).
+	var center_pad := _part(_box(12.6, 0.04, 12.6), _mat(Color("17120d")), Vector3(0, 0.005, 0))
+	add_child(center_pad)
+
 	var logo := Label3D.new()
 	logo.text = "BUGOPOLY"
 	logo.font = Brand.font_display()
 	logo.font_size = 200
-	logo.pixel_size = 0.013
-	logo.modulate = Color(Brand.RED.r, Brand.RED.g, Brand.RED.b, 0.42)
-	logo.position = Vector3(0, 0.03, 0)
-	logo.rotation_degrees = Vector3(-90, 0, -45)
+	logo.pixel_size = 0.0098
+	logo.modulate = Brand.RED
+	logo.outline_size = 22
+	logo.outline_modulate = Color(0.18, 0.05, 0.045, 0.95)
+	logo.position = Vector3(0, 0.05, 0.2)
+	logo.rotation_degrees = Vector3(-90, 0, -7)
 	add_child(logo)
+
+	# tagline del kit, plano al frente del centro
+	var tag := Label3D.new()
+	tag.text = "// Construí cobertura  ·  Shipeá el release  ·  Cazá los bugs"
+	tag.font = Brand.font_heavy()
+	tag.font_size = 40
+	tag.pixel_size = 0.0072
+	tag.modulate = Brand.CREAM
+	tag.outline_size = 8
+	tag.outline_modulate = Color(0, 0, 0, 0.85)
+	tag.position = Vector3(0, 0.055, 4.4)
+	tag.rotation_degrees = Vector3(-90, 0, 0)
+	add_child(tag)
 
 	_build_diorama()
 
@@ -142,19 +161,19 @@ func _load_model(path: String, scale: float) -> Node3D:
 	return root
 
 func _build_diorama() -> void:
-	# Skyline compacto de "ciudad de software", tintado a la paleta de marca.
+	# Mini "ciudad de software" baja, en fila al FONDO del centro (no tapa el logo).
 	var builds := [
-		["building-skyscraper-a", Vector2(0, 0), 1.4, 0.0, Brand.CREAM],
-		["building-skyscraper-c", Vector2(1.7, 0.5), 1.2, 30.0, Brand.RED],
-		["building-skyscraper-b", Vector2(-1.5, 0.9), 1.2, -20.0, Brand.GROUP[0]],
-		["building-skyscraper-d", Vector2(0.8, -1.7), 1.1, 15.0, Brand.GOLD],
-		["building-a", Vector2(-1.7, -1.3), 1.0, 45.0, Brand.GROUP[5]],
-		["building-e", Vector2(1.9, -1.3), 1.0, -10.0, Brand.GROUP[2]],
+		["building-skyscraper-b", Vector2(-4.4, -4.2), 0.55, -6.0, Brand.GROUP[2]],
+		["building-skyscraper-a", Vector2(-3.0, -4.8), 0.80, 12.0, Brand.GROUP[0]],
+		["building-skyscraper-c", Vector2(-1.3, -5.3), 0.68, -8.0, Brand.RED],
+		["building-skyscraper-b", Vector2(0.5, -5.4), 0.92, 6.0, Brand.CREAM],
+		["building-skyscraper-d", Vector2(2.3, -5.0), 0.64, -14.0, Brand.GOLD],
+		["building-a", Vector2(3.8, -4.3), 0.58, 20.0, Brand.GROUP[5]],
 	]
 	for b in builds:
 		var pv: Vector2 = b[1]
 		var node := _load_model(CITY + str(b[0]) + ".glb", float(b[2]))
-		node.position = Vector3(pv.x, 0, pv.y)
+		node.position = Vector3(pv.x, 0.028, pv.y)
 		node.rotation_degrees = Vector3(0, float(b[3]), 0)
 		_tint(node, b[4])
 		add_child(node)
