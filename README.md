@@ -18,19 +18,21 @@ Hecho con **Godot Engine 4.6**. Jugable en multijugador local (hot-seat con bots
 
 ## Características
 
-- **Tablero 3D** estilo juego de mesa premium, 40 casillas, con fichas-monstruo animadas (**21 para elegir**).
-- **Propiedades = módulos de software** agrupados por subsistema; al desarrollarlos crecen edificios (cobertura de tests → CI/CD) y sube la renta.
+- **Tablero 3D** estilo juego de mesa premium, 40 casillas, con fichas-monstruo animadas (**21 para elegir**) y centro oscuro con logo + ciudad de software.
+- **Propiedades = módulos de software** por subsistema: al **comprar**, un tractor aplana el lote y queda el cimiento con el color del dueño; al **desarrollar**, crecen edificios (cobertura de tests → CI/CD) con polvo y sube la renta.
 - **Deuda Técnica**: se acumula y cobra interés cada turno; se refactoriza/paga en el Coffee Break.
 - **Retos QA** reales (severidad vs prioridad, valores límite, TDD, idempotencia…) que otorgan **cartas de habilidad**:
   - **Hotfix** — limpia tu deuda técnica.
   - **Rollback** — recuperás tu último gasto.
   - **Feature Flag** — tu próxima renta es gratis.
-- **Cartas Bug / Retro** con humor dev.
-- **Casillas especiales**: Salida (Nuevo Sprint), Bug Report, Reto QA, Deuda Técnica, Bloqueado, On-Call, Coffee Break, Incidente en Prod, Retro.
+- **Cartas Bug / Retro** con cara del Art Kit: salen del mazo y se agrandan hacia la pantalla, con el icono del kit en el centro.
+- **Billetes "QA Credits"** texturizados con denominación (10/50/100/500/1000, color por valor) que vuelan hacia la pantalla al cobrar/pagar.
+- **Casillas especiales** con iconos del kit (Salida, Bug Report, Reto QA, Deuda Técnica, Bloqueado, On-Call, Coffee Break, Incidente en Prod, Retro); las propiedades muestran icono de subsistema y descripción QA al comprar.
+- **Vida en el tablero**: multitud de monstruos bailando + espectadores animados (saludan, pelean) alrededor; cámara con órbita lenta; anillo en la ficha del turno.
 - **Pantalla de fin de partida** con stats y logros.
-- **Menú** con escena 3D de fondo (monstruos y persecución de zombies al fondo), música, y secciones de Ayuda y Créditos.
+- **Menú**: título con extrude 3D, mini-tablero con monstruos bailando, baraja Bug/Retro y billete QA Credits de marca, música, y secciones de Ayuda y Créditos.
 - **Opciones** de audio (música / sonidos / voces por separado) y de gráficos (antialiasing, escala de render, sombras, glow, fullscreen, vsync).
-- **Optimizado para GPU integrada** (renderer Mobile, carga lazy, caché de materiales).
+- **App icon propio** (cíclope de marca) y **optimizado para GPU integrada** (renderer Mobile, carga lazy, caché de materiales y texturas).
 - **Data-driven y moddeable**: tablero, cartas, retos, fichas y subsistemas viven en JSON bajo `data/` y `mods/`.
 
 ## Cómo correr
@@ -89,10 +91,13 @@ assets/bugopoly/ modelos, sonidos, música, texturas, iconos, fuentes
 
 ## Roadmap
 
-- [ ] Portar el estilo del logo (rojo con extrude 3D) al título del menú.
-- [ ] Render in-game de carta de propiedad y billetes "QA Credits".
+- [x] Título del menú con extrude 3D + app icon de marca.
+- [x] Cartas (Bug/Retro/propiedad) y billetes "QA Credits" in-game con el Art Kit.
+- [x] Tractor de construcción, multitud de monstruos y espectadores animados.
 - [ ] Capturas de pantalla y GIF de gameplay.
 - [ ] Más retos QA y cartas.
+- [ ] Comercio entre jugadores (ofrecer/intercambiar propiedades).
+- [ ] Guardar opciones (audio/gráficos) en disco.
 
 ## Créditos / licencias de assets
 
