@@ -1,0 +1,12 @@
+[
+  {
+    "id": "test_pyramid",
+    "topic": "Estrategia",
+    "prompt": "En la piramide de testing, que tipo de prueba deberia ser el MAS abundante?",
+    "options": ["End-to-end (UI)", "Integracion", "Unitarias", "Manuales"],
+    "answer": 2,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "La base de la piramide son las pruebas unitarias: muchas, rapidas y baratas. Las E2E van en la punta: pocas, lentas y fragiles."
+  }
+]

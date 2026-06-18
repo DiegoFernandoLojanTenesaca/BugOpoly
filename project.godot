@@ -1,0 +1,34 @@
+; Engine configuration file.
+; QAopoly — board game data-driven (estilo Vorenth) con tematica de Software QA.
+
+config_version=5
+
+[application]
+
+config/name="Bugopoly"
+config/description="Monopoly con tematica de Software QA. Compra modulos, caza bugs, cobra por cada defecto. Data-driven y modeable (estilo Vorenth)."
+run/main_scene="res://src/world/start_screen.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+
+[autoload]
+
+EventBus="*res://src/core/event_bus.gd"
+Registry="*res://src/core/registry.gd"
+GameState="*res://src/core/game_state.gd"
+AudioManager="*res://src/core/audio_manager.gd"
+GfxSettings="*res://src/core/gfx_settings.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+environment/defaults/default_clear_color=Color(0.094, 0.106, 0.137, 1)
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+anti_aliasing/quality/msaa_3d=2

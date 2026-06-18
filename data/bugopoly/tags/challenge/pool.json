@@ -1,0 +1,19 @@
+{
+  "values": [
+    "bugopoly:severity_vs_priority",
+    "bugopoly:boundary",
+    "bugopoly:flaky",
+    "bugopoly:smoke",
+    "bugopoly:regression",
+    "bugopoly:black_white",
+    "bugopoly:equivalence",
+    "bugopoly:test_pyramid",
+    "bugopoly:tdd",
+    "bugopoly:status_500",
+    "bugopoly:coverage_myth",
+    "bugopoly:root_cause",
+    "bugopoly:idempotency",
+    "bugopoly:mock",
+    "#c:challenges"
+  ]
+}

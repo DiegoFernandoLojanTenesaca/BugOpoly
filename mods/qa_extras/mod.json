@@ -1,0 +1,6 @@
+{
+  "id": "qa_extras",
+  "name": "QA Extras (mod de ejemplo)",
+  "version": "0.1.0",
+  "description": "Demuestra el sistema de mods: agregar, tag cross-pack, patch y override."
+}

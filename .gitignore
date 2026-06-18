@@ -1,0 +1,22 @@
+# Godot 4 — caché de importación (se regenera sola)
+.godot/
+
+# Binario del editor de Godot (pesado; cada uno usa el suyo)
+.godot-bin/
+
+# Packs de assets FUENTE (los modelos/sonidos usados ya están copiados en assets/)
+/assets_free/
+/Cute Animated Monsters*/
+/Design System/
+/sonidos/
+/vorenth-memorias/
+
+# Comprimidos y memorias del proyecto de referencia
+*.zip
+
+# Sistema operativo / temporales
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*~

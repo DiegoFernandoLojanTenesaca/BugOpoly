@@ -1,0 +1,6 @@
+{
+  "patch": "bugopoly:bug",
+  "entries": [
+    { "text": "Incidente de seguridad: dependencia con CVE en prod.", "money": -250 }
+  ]
+}

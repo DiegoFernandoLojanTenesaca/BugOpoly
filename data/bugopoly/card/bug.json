@@ -1,0 +1,25 @@
+{
+  "id": "bug",
+  "name": "Reporte de Bug",
+  "kind": "bug",
+  "entries": [
+    { "text": "Pusheaste a `main` un viernes 18:00. Null pointer en prod. Hotfix de emergencia.", "money": -180 },
+    { "text": "Un test flaky bloquea el merge por enésima vez. Perdés media tarde.", "money": -80 },
+    { "text": "Memory leak en el servicio de pagos: el pod se reinicia solo.", "money": -120 },
+    { "text": "Regresión en el login. 'Funcionaba en mi máquina'; el cliente no opina igual.", "money": -200 },
+    { "text": "Cobertura al 40% y el PM lo ve en el dashboard. Charla incómoda.", "money": -90 },
+    { "text": "Un bug escapó a prod, pero el rollback fue rápido. Susto nomás.", "money": -50 },
+    { "text": "`DROP TABLE` sin `WHERE` en staging pensando que era local.", "money": -250 },
+    { "text": "Dependencia transitiva con CVE crítico. Toca actualizar medio mundo.", "money": -140 },
+    { "text": "El cron corría en UTC y vos pensabas en GMT-3. Reportes mandados a las 3am.", "money": -100 },
+    { "text": "Race condition que solo aparece en prod bajo carga. Imposible de reproducir.", "money": -160 },
+    { "text": "Olvidaste un `await`: la promesa nunca se resolvió. El usuario tampoco esperó.", "money": -120 },
+    { "text": "Secreto de API commiteado al repo público. Rotación de claves de urgencia.", "money": -210 },
+    { "text": "El deploy falló a mitad: quedó mitad vieja, mitad nueva. Frankenstein en prod.", "money": -170 },
+    { "text": "On-call a las 4am: disco lleno por logs sin rotar.", "money": -90 },
+    { "text": "Tu 'arreglo rápido' rompió tres tests de integración.", "money": -100 },
+    { "text": "Webhook duplicado: le cobraste dos veces al cliente. Refund + disculpas.", "money": -180 },
+    { "text": "El feature flag quedó prendido para todos. Demo a producción sin querer.", "money": -150 },
+    { "text": "Merge sin resolver bien el conflicto: medio archivo quedó duplicado.", "money": -110 }
+  ]
+}

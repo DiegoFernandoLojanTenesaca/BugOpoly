@@ -1,0 +1,142 @@
+[
+  {
+    "id": "severity_vs_priority",
+    "topic": "Gestión de defectos",
+    "prompt": "Un typo en el logo de la home: feo pero no rompe nada. La dirección lo quiere YA. ¿Cómo se clasifica?",
+    "options": ["Severidad alta, prioridad baja", "Severidad baja, prioridad alta", "Severidad alta, prioridad alta", "No es un bug"],
+    "answer": 1,
+    "reward": 140,
+    "penalty": 70,
+    "explain": "La severidad mide el impacto técnico (bajo: es cosmético); la prioridad mide la urgencia de negocio (alta: lo quieren ya). Son ejes independientes."
+  },
+  {
+    "id": "boundary",
+    "topic": "Diseño de casos",
+    "prompt": "Un campo acepta de 1 a 100. ¿Qué valores son los MÁS importantes de probar (valores límite)?",
+    "options": ["50 y 51", "0, 1, 100 y 101", "Solo 1 y 100", "Cualquier valor al azar"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "Los bugs viven en los bordes: probar justo dentro (1, 100) y justo fuera (0, 101) del rango válido."
+  },
+  {
+    "id": "flaky",
+    "topic": "Automatización",
+    "prompt": "Un test pasa a veces y falla otras sin que cambie el código. ¿Cómo se le llama?",
+    "options": ["Test de humo", "Test flaky (inestable)", "Test de regresión", "Test unitario"],
+    "answer": 1,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Un test 'flaky' da resultados inconsistentes (timings, datos, orden). Mina la confianza en la suite; hay que arreglarlo o aislarlo."
+  },
+  {
+    "id": "smoke",
+    "topic": "Tipos de prueba",
+    "prompt": "¿Para qué sirve un smoke test tras un deploy?",
+    "options": ["Verificar a fondo cada función", "Comprobar rápido que lo crítico no está roto", "Medir el rendimiento", "Revisar la ortografía"],
+    "answer": 1,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "El smoke test es una verificación superficial y rápida: si lo básico funciona, se sigue probando; si no, se rechaza el build."
+  },
+  {
+    "id": "regression",
+    "topic": "Tipos de prueba",
+    "prompt": "Arreglaron un bug y agregaron una feature. ¿Qué tipo de prueba confirma que lo que YA funcionaba sigue funcionando?",
+    "options": ["Prueba de regresión", "Prueba exploratoria", "Prueba de carga", "Prueba de usabilidad"],
+    "answer": 0,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "La prueba de regresión re-verifica funcionalidad existente para asegurar que los cambios nuevos no rompieron nada."
+  },
+  {
+    "id": "black_white",
+    "topic": "Enfoques",
+    "prompt": "Probás sin mirar el código, solo entradas y salidas según el requisito. ¿Qué enfoque es?",
+    "options": ["Caja blanca", "Caja negra", "Caja gris", "Smoke"],
+    "answer": 1,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Caja negra: se prueba el comportamiento desde fuera, sin conocer la implementación. Caja blanca sería con el código a la vista."
+  },
+  {
+    "id": "equivalence",
+    "topic": "Diseño de casos",
+    "prompt": "Para un campo de edad (0-120), en vez de probar cada valor, agrupás entradas que se comportan igual. ¿Qué técnica es?",
+    "options": ["Valores límite", "Partición de equivalencia", "Tabla de decisión", "Pruebas aleatorias"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "La partición de equivalencia divide las entradas en clases que se procesan igual; basta probar un representante de cada clase."
+  },
+  {
+    "id": "test_pyramid",
+    "topic": "Estrategia",
+    "prompt": "Según la pirámide de tests, ¿de qué tipo deberías tener MÁS cantidad?",
+    "options": ["E2E (extremo a extremo)", "De integración", "Unitarios", "Manuales"],
+    "answer": 2,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "Los unitarios son rápidos y baratos: forman la base ancha de la pirámide. Los E2E, lentos y frágiles, van arriba y en menor número."
+  },
+  {
+    "id": "tdd",
+    "topic": "Desarrollo",
+    "prompt": "En TDD, ¿cuál es el orden correcto del ciclo?",
+    "options": ["Refactor → Red → Green", "Red (falla) → Green (pasa) → Refactor", "Green → Red → Refactor", "Código → test → deploy"],
+    "answer": 1,
+    "reward": 140,
+    "penalty": 70,
+    "explain": "TDD: primero un test que falla (Red), luego el código mínimo para que pase (Green), y al final se limpia el código (Refactor)."
+  },
+  {
+    "id": "status_500",
+    "topic": "APIs",
+    "prompt": "Una request bien formada, pero el servidor explota por su cuenta. ¿Qué código HTTP corresponde?",
+    "options": ["404 Not Found", "400 Bad Request", "500 Internal Server Error", "200 OK"],
+    "answer": 2,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Los 4xx son culpa del cliente (request mal hecha); los 5xx son culpa del servidor. Un fallo interno inesperado es 500."
+  },
+  {
+    "id": "coverage_myth",
+    "topic": "Métricas",
+    "prompt": "Tu suite tiene 100% de cobertura. ¿Qué garantiza eso?",
+    "options": ["Que no hay bugs", "Que cada línea se ejecutó al menos una vez", "Que el código es rápido", "Que los requisitos están completos"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "La cobertura solo mide qué líneas se ejecutaron, no si las aserciones son correctas ni si faltan casos. 100% no significa 'sin bugs'."
+  },
+  {
+    "id": "root_cause",
+    "topic": "Incidentes",
+    "prompt": "Un incidente se repite. ¿Qué técnica ayuda a llegar a la causa raíz?",
+    "options": ["Los 5 porqués", "Smoke test", "Code review", "Linting"],
+    "answer": 0,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Los '5 porqués' encadenan preguntas '¿por qué?' hasta pasar del síntoma a la causa raíz real del problema."
+  },
+  {
+    "id": "idempotency",
+    "topic": "APIs",
+    "prompt": "Un endpoint de pago debe poder reintentarse sin cobrar dos veces. ¿Qué propiedad necesita?",
+    "options": ["Idempotencia", "Concurrencia", "Caché", "Paginación"],
+    "answer": 0,
+    "reward": 140,
+    "penalty": 70,
+    "explain": "Una operación idempotente da el mismo resultado aunque se repita: reintentar el pago no genera un cobro duplicado."
+  },
+  {
+    "id": "mock",
+    "topic": "Automatización",
+    "prompt": "En un test unitario querés aislar tu código de la base de datos real. ¿Qué usás?",
+    "options": ["Un mock/stub", "La base de producción", "Un smoke test", "Nada, probás contra prod"],
+    "answer": 0,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Un mock/stub reemplaza la dependencia real (DB, API) por una controlada, para probar tu unidad de forma rápida y aislada."
+  }
+]

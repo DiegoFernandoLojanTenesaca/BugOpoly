@@ -1,0 +1,23 @@
+[
+  { "id": "cyclops",      "name": "Cíclope",       "shape": "cyclops" },
+  { "id": "ghost",        "name": "Fantasma",      "shape": "ghost" },
+  { "id": "demon",        "name": "Demonio",       "shape": "demon" },
+  { "id": "greendemon",   "name": "Demonio Verde", "shape": "greendemon" },
+  { "id": "cthulhu",      "name": "Cthulhu",       "shape": "cthulhu" },
+  { "id": "yellowdragon", "name": "Dragón",        "shape": "yellowdragon" },
+  { "id": "yeti",         "name": "Yeti",          "shape": "yeti" },
+  { "id": "skull",        "name": "Calavera",      "shape": "skull" },
+  { "id": "bat",          "name": "Murciélago",    "shape": "bat" },
+  { "id": "bee",          "name": "Abeja",         "shape": "bee" },
+  { "id": "crab",         "name": "Cangrejo",      "shape": "crab" },
+  { "id": "alien",        "name": "Alien",         "shape": "alien" },
+  { "id": "alien_tall",   "name": "Alien Alto",    "shape": "alien_tall" },
+  { "id": "mushroom",     "name": "Hongo",         "shape": "mushroom" },
+  { "id": "cactus",       "name": "Cactus",        "shape": "cactus" },
+  { "id": "tree",         "name": "Árbol",         "shape": "tree" },
+  { "id": "panda",        "name": "Panda",         "shape": "panda" },
+  { "id": "pig",          "name": "Cerdo",         "shape": "pig" },
+  { "id": "deer",         "name": "Ciervo",        "shape": "deer" },
+  { "id": "chicken",      "name": "Pollo",         "shape": "chicken" },
+  { "id": "penguin",      "name": "Pingüino",      "shape": "penguin" }
+]

@@ -1,0 +1,538 @@
+extends Control
+## Pantalla de inicio BUGOPOLY. Estilo de marca via Brand (src/ui/palette.gd).
+
+const Brand = preload("res://src/ui/palette.gd")
+
+const PIECES := [["Cíclope", "bugopoly:cyclops"], ["Fantasma", "bugopoly:ghost"], ["Demonio", "bugopoly:demon"], ["Demonio Verde", "bugopoly:greendemon"], ["Cthulhu", "bugopoly:cthulhu"], ["Dragón", "bugopoly:yellowdragon"], ["Yeti", "bugopoly:yeti"], ["Calavera", "bugopoly:skull"], ["Murciélago", "bugopoly:bat"], ["Abeja", "bugopoly:bee"], ["Cangrejo", "bugopoly:crab"], ["Alien", "bugopoly:alien"], ["Alien Alto", "bugopoly:alien_tall"], ["Hongo", "bugopoly:mushroom"], ["Cactus", "bugopoly:cactus"], ["Árbol", "bugopoly:tree"], ["Panda", "bugopoly:panda"], ["Cerdo", "bugopoly:pig"], ["Ciervo", "bugopoly:deer"], ["Pollo", "bugopoly:chicken"], ["Pingüino", "bugopoly:penguin"]]
+const NAMES := ["Tú", "Bot Tester", "Jugador 3", "Jugador 4"]
+
+var _rows: Array = []
+var _list: VBoxContainer
+var _add_btn: Button
+var _title: Label
+var _sub: Label
+var _menu: VBoxContainer
+var _players_overlay: Control = null
+var _scene_t := 0.0
+var _scene_mons: Array = []     # monstruos que giran en el tablero de fondo
+var _scene_runners: Array = []  # personajes corriendo de lado a lado
+
+func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_build_background()
+	_build_scene()
+	_build_vignette()
+	_build_title()
+	_build_main_menu()
+	_animate_in()
+
+func _build_background() -> void:
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 1.0])
+	grad.colors = PackedColorArray([Brand.INK_700, Brand.BLACK_COOL])
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.width = 512
+	tex.height = 512
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.40)
+	tex.fill_to = Vector2(1.05, 1.05)
+	var bg := TextureRect.new()
+	bg.texture = tex
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	add_child(bg)
+	# gradiente que respira lento
+	var gtw := create_tween().set_loops()
+	gtw.tween_property(tex, "fill_from", Vector2(0.4, 0.34), 7.0).set_trans(Tween.TRANS_SINE)
+	gtw.tween_property(tex, "fill_from", Vector2(0.6, 0.46), 7.0).set_trans(Tween.TRANS_SINE)
+
+func _build_title() -> void:
+	var title := Label.new()
+	_title = title
+	title.text = "BUGOPOLY"
+	title.add_theme_font_override("font", Brand.font_display())
+	title.add_theme_font_size_override("font_size", 84)
+	title.add_theme_color_override("font_color", Brand.RED)
+	title.add_theme_constant_override("outline_size", 12)
+	title.add_theme_color_override("font_outline_color", Color("3a0f0d"))
+	title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
+	title.add_theme_constant_override("shadow_offset_x", 0)
+	title.add_theme_constant_override("shadow_offset_y", 7)
+	title.position = Vector2(54, 24)
+	add_child(title)
+
+	var sub := Label.new()
+	_sub = sub
+	sub.text = "Monopoliza el stack antes del deploy"
+	sub.add_theme_font_size_override("font_size", 20)
+	sub.add_theme_color_override("font_color", Brand.TEXT_BODY)
+	sub.position = Vector2(62, 134)
+	add_child(sub)
+
+	# Sheen: destello blanco que barre el título (arriba-izquierda).
+	var sheen := ColorRect.new()
+	sheen.color = Color(1, 1, 1, 0.0)
+	sheen.size = Vector2(70, 150)
+	sheen.position = Vector2(50, 18)
+	sheen.rotation_degrees = 16
+	sheen.pivot_offset = Vector2(35, 75)
+	sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(sheen)
+	var mv := create_tween().set_loops()
+	mv.tween_interval(2.6)
+	mv.tween_property(sheen, "position:x", 470, 1.0).from(50).set_trans(Tween.TRANS_SINE)
+	var fd := create_tween().set_loops()
+	fd.tween_interval(2.6)
+	fd.tween_property(sheen, "color:a", 0.16, 0.5).from(0.0)
+	fd.tween_property(sheen, "color:a", 0.0, 0.5)
+
+func _show_players() -> void:
+	if _players_overlay != null:
+		return
+	_rows.clear()
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	_players_overlay = root
+	var dim := ColorRect.new()
+	dim.color = Color(0.03, 0.02, 0.03, 0.55)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(620, 0)
+	panel.add_theme_stylebox_override("panel", Brand.card_box())
+	center.add_child(panel)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 14)
+	panel.add_child(vb)
+
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	var accent := Panel.new()
+	accent.custom_minimum_size = Vector2(6, 22)
+	var ab := StyleBoxFlat.new()
+	ab.bg_color = Brand.GOLD
+	ab.set_corner_radius_all(3)
+	accent.add_theme_stylebox_override("panel", ab)
+	head.add_child(accent)
+	var lbl := Label.new()
+	lbl.text = "JUGADORES"
+	lbl.add_theme_font_override("font", Brand.font_heavy())
+	lbl.add_theme_font_size_override("font_size", 19)
+	lbl.add_theme_color_override("font_color", Brand.TEXT_STRONG)
+	head.add_child(lbl)
+	vb.add_child(head)
+
+	_list = VBoxContainer.new()
+	_list.add_theme_constant_override("separation", 8)
+	vb.add_child(_list)
+
+	_add_btn = Button.new()
+	_add_btn.text = "+  Agregar jugador"
+	_add_btn.add_theme_font_size_override("font_size", 17)
+	Brand.style_button(_add_btn, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
+	_add_btn.pressed.connect(_on_add)
+	vb.add_child(_add_btn)
+
+	vb.add_child(HSeparator.new())
+	var btns := HBoxContainer.new()
+	btns.add_theme_constant_override("separation", 14)
+	btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	vb.add_child(btns)
+	var back := Button.new()
+	back.text = "VOLVER"
+	back.add_theme_font_size_override("font_size", 18)
+	Brand.style_button(back, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
+	back.pressed.connect(_close_players)
+	btns.add_child(back)
+	var start := Button.new()
+	start.text = "EMPEZAR"
+	start.add_theme_font_size_override("font_size", 20)
+	Brand.style_button(start, Brand.RED, Brand.RED_HOVER, Brand.WHITE)
+	start.pressed.connect(_on_play)
+	btns.add_child(start)
+
+	_add_row(false, 0)
+	_add_row(true, 1)
+	root.modulate.a = 0.0
+	create_tween().tween_property(root, "modulate:a", 1.0, 0.25)
+
+func _close_players() -> void:
+	if _players_overlay != null:
+		_players_overlay.queue_free()
+		_players_overlay = null
+
+func _show_help() -> void:
+	_show_info("CÓMO JUGAR", "•  Tirá los dados y avanzá por el tablero.\n•  Comprá módulos de software (propiedades) y cobrá renta a quien caiga ahí.\n•  Construí cobertura de tests → CI/CD para subir la renta (los edificios crecen).\n•  Cuidado con la Deuda Técnica: acumula interés cada turno; refactorizá en el Coffee Break.\n•  Acertá los Retos QA para ganar cartas: Hotfix (limpia deuda), Rollback (recupera tu último gasto), Feature Flag (próxima renta gratis).\n•  El último jugador en pie shipea el release y gana.")
+
+func _show_credits() -> void:
+	_show_info("CRÉDITOS", "BUGOPOLY — juego de mesa digital de QA y programación.\nHecho con Godot Engine 4.6.\n\nAssets (todos libres / CC0):\n• Monstruos y personajes — Quaternius\n• Edificios y props — Kenney\n• Texturas de madera — Poly Haven (CC0)\n• Música de menú — OpenGameArt (CC0)\n• Sonidos y voces — Kenney (CC0)\n• Fuentes — Bungee y Archivo Black (Google Fonts, OFL)")
+
+func _show_info(title_text: String, body: String) -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	var dim := ColorRect.new()
+	dim.color = Color(0.03, 0.02, 0.03, 0.6)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(620, 0)
+	panel.add_theme_stylebox_override("panel", Brand.card_box())
+	center.add_child(panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 14)
+	panel.add_child(vb)
+	var t := Label.new()
+	t.text = title_text
+	t.add_theme_font_override("font", Brand.font_heavy())
+	t.add_theme_font_size_override("font_size", 22)
+	t.add_theme_color_override("font_color", Brand.GOLD)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(t)
+	vb.add_child(HSeparator.new())
+	var b := Label.new()
+	b.text = body
+	b.add_theme_font_size_override("font_size", 16)
+	b.add_theme_color_override("font_color", Brand.TEXT_BODY)
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	b.custom_minimum_size = Vector2(560, 0)
+	vb.add_child(b)
+	vb.add_child(HSeparator.new())
+	var close := Button.new()
+	close.text = "CERRAR"
+	close.add_theme_font_size_override("font_size", 18)
+	Brand.style_button(close, Brand.RED, Brand.RED_HOVER, Brand.WHITE)
+	close.pressed.connect(root.queue_free)
+	vb.add_child(close)
+	root.modulate.a = 0.0
+	create_tween().tween_property(root, "modulate:a", 1.0, 0.2)
+
+func _build_main_menu() -> void:
+	# Menú minimalista abajo-izquierda (estilo ARCO/ALONE).
+	var menu := VBoxContainer.new()
+	_menu = menu
+	menu.position = Vector2(60, 432)
+	menu.add_theme_constant_override("separation", 4)
+	add_child(menu)
+	menu.add_child(_menu_item("JUGAR", _show_players, Brand.RED, 40))
+	menu.add_child(_menu_item("OPCIONES", _show_options, Brand.TEXT_BODY, 28))
+	menu.add_child(_menu_item("AYUDA", _show_help, Brand.TEXT_BODY, 28))
+	menu.add_child(_menu_item("CRÉDITOS", _show_credits, Brand.TEXT_BODY, 28))
+	menu.add_child(_menu_item("SALIR", get_tree().quit, Brand.TEXT_MUTED, 28))
+
+func _menu_item(text: String, cb: Callable, col: Color, size: int) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.flat = true
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.add_theme_font_override("font", Brand.font_heavy())
+	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_color_override("font_color", col)
+	b.add_theme_color_override("font_hover_color", Brand.GOLD)
+	b.add_theme_color_override("font_pressed_color", Brand.GOLD_HI)
+	var empty := StyleBoxEmpty.new()
+	b.add_theme_stylebox_override("normal", empty)
+	b.add_theme_stylebox_override("hover", empty)
+	b.add_theme_stylebox_override("pressed", empty)
+	b.add_theme_stylebox_override("focus", empty)
+	b.pressed.connect(cb)
+	return b
+
+func _show_options() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	var dim := ColorRect.new()
+	dim.color = Color(0.04, 0.03, 0.03, 0.7)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(470, 0)
+	panel.add_theme_stylebox_override("panel", Brand.card_box())
+	center.add_child(panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 12)
+	panel.add_child(vb)
+	var t := Label.new()
+	t.text = "OPCIONES"
+	t.add_theme_font_override("font", Brand.font_heavy())
+	t.add_theme_font_size_override("font_size", 20)
+	t.add_theme_color_override("font_color", Brand.TEXT_STRONG)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(t)
+	vb.add_child(HSeparator.new())
+	var al := Label.new()
+	al.text = "AUDIO"
+	al.add_theme_font_override("font", Brand.font_heavy())
+	al.add_theme_font_size_override("font_size", 14)
+	al.add_theme_color_override("font_color", Brand.TEXT_MUTED)
+	vb.add_child(al)
+	vb.add_child(AudioManager.build_volume_panel())
+	vb.add_child(HSeparator.new())
+	var gl := Label.new()
+	gl.text = "GRÁFICOS"
+	gl.add_theme_font_override("font", Brand.font_heavy())
+	gl.add_theme_font_size_override("font_size", 14)
+	gl.add_theme_color_override("font_color", Brand.TEXT_MUTED)
+	vb.add_child(gl)
+	vb.add_child(GfxSettings.build_panel())
+	vb.add_child(HSeparator.new())
+	var close := Button.new()
+	close.text = "CERRAR"
+	close.add_theme_font_size_override("font_size", 18)
+	Brand.style_button(close, Brand.RED, Brand.RED_HOVER, Brand.WHITE)
+	close.pressed.connect(root.queue_free)
+	vb.add_child(close)
+
+# ---------- cinemática / animaciones ----------
+
+func _build_scene() -> void:
+	# Fondo 3D: tablero con monstruos girando + persecución, en un viewport transparente.
+	var vpc := SubViewportContainer.new()
+	vpc.stretch = true
+	vpc.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vpc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(vpc)
+	var vp := SubViewport.new()
+	vp.size = Vector2i(1280, 720)
+	vp.transparent_bg = true
+	vp.own_world_3d = true
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vpc.add_child(vp)
+
+	var cam := Camera3D.new()
+	cam.fov = 40
+	cam.transform = Transform3D(Basis(), Vector3(0, 5.5, 9.0)).looking_at(Vector3(0, 0.4, 0), Vector3.UP)
+	vp.add_child(cam)
+
+	var key := DirectionalLight3D.new()
+	key.rotation_degrees = Vector3(-42, -35, 0)
+	key.light_energy = 1.1
+	vp.add_child(key)
+	var rim := DirectionalLight3D.new()
+	rim.rotation_degrees = Vector3(-16, 205, 0)
+	rim.light_energy = 0.6
+	rim.light_color = Color(1.0, 0.84, 0.58)
+	vp.add_child(rim)
+
+	# plataforma tipo tablero + logo
+	var plat := MeshInstance3D.new()
+	var pm := BoxMesh.new()
+	pm.size = Vector3(7.0, 0.3, 7.0)
+	plat.mesh = pm
+	plat.position = Vector3(0, -0.15, 0)
+	var pmat := StandardMaterial3D.new()
+	pmat.albedo_color = Brand.CREAM
+	pmat.roughness = 0.9
+	plat.material_override = pmat
+	vp.add_child(plat)
+	# monstruos parados que giran
+	var bv := BoardView.new()
+	var spots := [["cyclops", Vector3(-2.0, 0, 1.3)], ["ghost", Vector3(2.1, 0, -0.2)], ["demon", Vector3(-0.2, 0, -2.0)]]
+	for sp in spots:
+		var m: Node3D = bv._load_piece_model(sp[0], Brand.RED, false)
+		if m != null:
+			m.position = sp[1]
+			vp.add_child(m)
+			_scene_mons.append(m)
+	bv.free()
+
+	# persecución corriendo detrás del tablero
+	_bg_run(vp, "shaun", 0.0)
+	_bg_run(vp, "zombie_basic", 0.5)
+
+func _bg_run(vp: SubViewport, name: String, phase: float) -> void:
+	var n := _bg_load_char(name)
+	if n == null:
+		return
+	vp.add_child(n)
+	_scene_runners.append({"node": n, "phase": phase})
+
+func _bg_load_char(name: String) -> Node3D:
+	var abs_path := ProjectSettings.globalize_path("res://assets/bugopoly/models/chars/" + name + ".gltf")
+	if not FileAccess.file_exists(abs_path):
+		return null
+	var doc := GLTFDocument.new()
+	var st := GLTFState.new()
+	if doc.append_from_file(abs_path, st) != OK:
+		return null
+	var inst: Node = doc.generate_scene(st)
+	if inst == null:
+		return null
+	var holder := Node3D.new()
+	var wrap := Node3D.new()
+	wrap.scale = Vector3(1.4, 1.4, 1.4)
+	wrap.add_child(inst)
+	holder.add_child(wrap)
+	var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
+	if not aps.is_empty():
+		var ap: AnimationPlayer = aps[0]
+		for a in ap.get_animation_list():
+			if "run" in str(a).to_lower():
+				ap.get_animation(a).loop_mode = Animation.LOOP_LINEAR
+				ap.play(a)
+				break
+	return holder
+
+func _build_vignette() -> void:
+	# Velo oscuro radial sobre la escena (la UI se lee mejor).
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	grad.colors = PackedColorArray([Color(0.05, 0.04, 0.06, 0.20), Color(0.05, 0.04, 0.06, 0.45), Color(0.03, 0.02, 0.03, 0.86)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.width = 512
+	tex.height = 512
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.45)
+	tex.fill_to = Vector2(1.0, 1.0)
+	var v := TextureRect.new()
+	v.texture = tex
+	v.set_anchors_preset(Control.PRESET_FULL_RECT)
+	v.stretch_mode = TextureRect.STRETCH_SCALE
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(v)
+
+func _process(delta: float) -> void:
+	_scene_t += delta
+	for m in _scene_mons:
+		var mm: Node3D = m
+		mm.rotation.y += delta * 0.7
+	for ru in _scene_runners:
+		var rn: Node3D = ru["node"]
+		var ph: float = _scene_t * 0.7 + ru["phase"]
+		rn.position = Vector3(sin(ph) * 5.0, 0.0, -3.6)
+		rn.rotation.y = PI * 0.5 if cos(ph) >= 0.0 else -PI * 0.5
+
+func _build_ambient() -> void:
+	# Burbujas suaves de marca a la deriva (bokeh), detrás de la UI.
+	var cols := [Brand.GOLD, Brand.RED, Brand.GROUP[0], Brand.GROUP[5], Brand.GROUP[2]]
+	for i in 9:
+		var sz := randf_range(40.0, 120.0)
+		var dot := Panel.new()
+		dot.custom_minimum_size = Vector2(sz, sz)
+		dot.size = Vector2(sz, sz)
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var c: Color = cols[i % cols.size()]
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(c.r, c.g, c.b, 0.06)
+		sb.set_corner_radius_all(int(sz * 0.5))
+		dot.add_theme_stylebox_override("panel", sb)
+		var y0 := randf_range(40.0, 660.0)
+		dot.position = Vector2(randf_range(0.0, 1180.0), y0)
+		add_child(dot)
+		var drift := randf_range(10.0, 26.0)
+		var dur := randf_range(6.0, 12.0)
+		var tw := create_tween().set_loops()
+		tw.tween_property(dot, "position:y", y0 - drift, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(dot, "position:y", y0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _animate_in() -> void:
+	_title.modulate.a = 0.0
+	_title.position.x = 18
+	_sub.modulate.a = 0.0
+	_menu.modulate.a = 0.0
+	_menu.position.x = 24
+
+	var t := create_tween()
+	t.tween_interval(0.15)
+	t.tween_property(_title, "position:x", 54, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(_title, "modulate:a", 1.0, 0.4)
+	t.tween_property(_sub, "modulate:a", 1.0, 0.35)
+	t.tween_property(_menu, "position:x", 60, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(_menu, "modulate:a", 1.0, 0.45)
+	t.tween_callback(_idle_title)
+
+func _idle_title() -> void:
+	_title.pivot_offset = Vector2(0, 48)
+	var t := create_tween().set_loops()
+	t.tween_property(_title, "scale", Vector2(1.02, 1.02), 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(_title, "scale", Vector2.ONE, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _scale_to(ctrl: Control, s: float) -> void:
+	create_tween().tween_property(ctrl, "scale", Vector2(s, s), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+func _on_add() -> void:
+	if _rows.size() < 4:
+		_add_row(_rows.size() != 0, _rows.size())
+
+func _add_row(is_bot: bool, idx: int) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+
+	var swatch := Panel.new()
+	swatch.custom_minimum_size = Vector2(30, 30)
+	swatch.add_theme_stylebox_override("panel", Brand.swatch_box(idx))
+	row.add_child(swatch)
+
+	var ne := LineEdit.new()
+	ne.text = NAMES[idx]
+	ne.custom_minimum_size = Vector2(200, 0)
+	Brand.style_line_edit(ne)
+	row.add_child(ne)
+
+	var bot := CheckButton.new()
+	bot.text = "Bot"
+	bot.button_pressed = is_bot
+	bot.add_theme_color_override("font_color", Brand.TEXT_BODY)
+	row.add_child(bot)
+
+	var po := OptionButton.new()
+	for pp in PIECES:
+		po.add_item(str(pp[0]))
+	po.select(idx % PIECES.size())
+	row.add_child(po)
+
+	var rm := Button.new()
+	rm.text = "✕"
+	Brand.style_button(rm, Brand.SURFACE_RAISED, Brand.INK_700, Brand.RED_TINT)
+	rm.custom_minimum_size = Vector2(42, 0)
+	rm.pressed.connect(_on_remove.bind(row))
+	row.add_child(rm)
+
+	_list.add_child(row)
+	_rows.append({"name": ne, "bot": bot, "piece": po, "row": row})
+	_add_btn.disabled = _rows.size() >= 4
+
+func _on_remove(row: Node) -> void:
+	if _rows.size() <= 2:
+		return
+	for i in _rows.size():
+		if _rows[i]["row"] == row:
+			_rows.remove_at(i)
+			break
+	row.queue_free()
+	_add_btn.disabled = _rows.size() >= 4
+
+func _on_play() -> void:
+	GameState.pending_configs = []
+	for i in _rows.size():
+		var r: Dictionary = _rows[i]
+		var nm: String = r["name"].text
+		GameState.pending_configs.append({
+			"name": nm if nm != "" else "J%d" % (i + 1),
+			"is_bot": r["bot"].button_pressed,
+			"color": Brand.GROUP[i % Brand.GROUP.size()],
+			"piece": PIECES[r["piece"].selected][1],
+		})
+	# Transición cinemática: fundido a negro y entra al tablero.
+	var fade := ColorRect.new()
+	fade.color = Color(0.055, 0.04, 0.035, 0.0)
+	fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(fade)
+	var t := create_tween()
+	t.tween_property(fade, "color:a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD)
+	t.tween_callback(func(): get_tree().change_scene_to_file("res://src/world/main.tscn"))

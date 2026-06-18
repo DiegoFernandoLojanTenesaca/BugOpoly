@@ -1,0 +1,12 @@
+[
+  { "id": "frontend",  "name": "Frontend",      "color": "#2e6fb0" },
+  { "id": "backend",   "name": "Backend",       "color": "#1f7a3d" },
+  { "id": "database",  "name": "Base de Datos", "color": "#e08a1e" },
+  { "id": "auth",      "name": "Autenticacion", "color": "#7b3aa0" },
+  { "id": "payments",  "name": "Pagos",         "color": "#c0271f" },
+  { "id": "mobile",    "name": "Mobile",        "color": "#16a0a0" },
+  { "id": "analytics", "name": "Analitica",     "color": "#d14f8f" },
+  { "id": "infra",     "name": "Infra",         "color": "#3a3a42" },
+  { "id": "pipeline",  "name": "Pipeline CI",   "color": "#8a8f98" },
+  { "id": "cloud",     "name": "Cloud",         "color": "#5bb0e0" }
+]

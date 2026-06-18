@@ -1,0 +1,25 @@
+{
+  "id": "retro",
+  "name": "Retro",
+  "kind": "retro",
+  "entries": [
+    { "text": "Cazaste un bug crítico justo antes del release. El equipo te debe una.", "money": 200 },
+    { "text": "Automatizaste una suite manual: ahorrás horas cada sprint.", "money": 160 },
+    { "text": "Reporte de bug impecable: pasos, logs y video. El dev lo arregla en 10 min.", "money": 90 },
+    { "text": "Pair testing productivo: encontraron 3 edge cases juntos.", "money": 110 },
+    { "text": "Refactor de tests: baja la deuda técnica y el tiempo de CI.", "money": 140 },
+    { "text": "Demo sin incidentes. El cliente aplaude.", "money": 200 },
+    { "text": "Tu post-mortem sin culpables mejoró el proceso de todo el equipo.", "money": 130 },
+    { "text": "Configuraste alertas que cazaron el incidente antes que los usuarios.", "money": 170 },
+    { "text": "Migración de base sin downtime. Cero quejas.", "money": 180 },
+    { "text": "Tu PR de performance bajó el p95 a la mitad.", "money": 150 },
+    { "text": "Escribiste docs que de verdad alguien leyó. Milagro.", "money": 80 },
+    { "text": "Cobertura al 90% en el módulo crítico. Dormís tranquilo.", "money": 120 },
+    { "text": "Detectaste un secreto a punto de commitearse. Crisis evitada.", "money": 160 },
+    { "text": "Optimizaste la query N+1. La base te lo agradece.", "money": 130 },
+    { "text": "Onboarding de un junior: ahora cierra tickets solo.", "money": 110 },
+    { "text": "Cerraste el sprint a tiempo y sin horas extra.", "money": 150 },
+    { "text": "Encontraste la causa raíz con los 5 porqués. Nunca más pasa.", "money": 140 },
+    { "text": "Tu feature flag permitió un rollback instantáneo. Cero pánico.", "money": 120 }
+  ]
+}
