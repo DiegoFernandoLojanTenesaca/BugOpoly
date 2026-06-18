@@ -24,6 +24,7 @@ func _ready() -> void:
 	_cam = Camera3D.new()
 	_cam.fov = FOV
 	add_child(_cam)
+	_dist = DIST_OVERVIEW + 22.0  # arranca lejos y hace zoom de entrada
 	_apply()
 
 func _process(delta: float) -> void:

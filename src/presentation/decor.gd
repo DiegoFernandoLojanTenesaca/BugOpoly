@@ -36,12 +36,35 @@ func build(board_half: float) -> void:
 	_spectator("pug", "Idle_2", Vector3(0.0, 0, -bh2))
 
 func _spectator(name: String, anim: String, pos: Vector3) -> void:
-	var n := _load_char(name, anim, 2.2)
+	var n := _load_char(name, "Walk", 2.2)  # entra caminando
 	if n == null:
 		return
-	n.position = pos
+	n.position = pos * 1.5  # arranca afuera de cámara
+	n.rotation.y = atan2(-pos.x, -pos.z)  # camina hacia el tablero
 	add_child(n)
-	n.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
+	var tw := create_tween()
+	tw.tween_interval(randf_range(0.1, 1.0))
+	tw.tween_property(n, "position", pos, 1.6).set_trans(Tween.TRANS_SINE)
+	tw.tween_callback(_spectator_arrive.bind(n, anim))
+
+func _spectator_arrive(node: Node3D, anim: String) -> void:
+	if is_instance_valid(node):
+		_play_anim(node, anim)
+
+func _play_anim(node: Node3D, anim: String) -> void:
+	for ap in node.find_children("*", "AnimationPlayer", true, false):
+		var list: PackedStringArray = ap.get_animation_list()
+		var pick := ""
+		for a in list:
+			if anim in str(a).to_lower():
+				pick = a
+				break
+		if pick == "" and not list.is_empty():
+			pick = list[0]
+		if pick != "":
+			ap.get_animation(pick).loop_mode = Animation.LOOP_LINEAR
+			ap.play(pick)
+		return
 
 func _chase(survivor: String, zombie: String, z: float, speed: float, phase: float, range: float) -> void:
 	_runner(_load_char(survivor, "Run", 2.4), z, speed, phase, range)

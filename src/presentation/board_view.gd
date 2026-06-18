@@ -162,13 +162,36 @@ func _build_monster_crowd() -> void:
 	for i in crowd.size():
 		var f := (float(i) + 0.5) / float(crowd.size())  # repartidos parejos por el perímetro cuadrado
 		var pos := _square_ring_point(f, r)
-		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "dance")
+		var m := _load_piece_model(crowd[i], cols[i % cols.size()], false, "walk")  # entra caminando
 		if m == null:
 			continue
 		m.scale = Vector3(2.2, 2.2, 2.2)
-		m.position = pos
-		m.rotation.y = atan2(-pos.x, -pos.z)  # mira al tablero (+Z al frente)
+		m.position = pos * 1.8  # arranca afuera (fuera de cámara)
+		m.rotation.y = atan2(-pos.x, -pos.z)  # camina hacia el tablero
 		add_child(m)
+		var tw := create_tween()
+		tw.tween_interval(0.2 + f * 0.9)  # entran escalonados
+		tw.tween_property(m, "position", pos, 1.5).set_trans(Tween.TRANS_SINE)
+		tw.tween_callback(_arrive_anim.bind(m, "dance"))  # al llegar, a bailar
+
+func _arrive_anim(node: Node3D, anim: String) -> void:
+	if is_instance_valid(node):
+		_play_anim(node, anim)
+
+func _play_anim(node: Node3D, anim: String) -> void:
+	for ap in node.find_children("*", "AnimationPlayer", true, false):
+		var list: PackedStringArray = ap.get_animation_list()
+		var pick := ""
+		for a in list:
+			if anim in str(a).to_lower():
+				pick = a
+				break
+		if pick == "" and not list.is_empty():
+			pick = list[0]
+		if pick != "":
+			ap.get_animation(pick).loop_mode = Animation.LOOP_LINEAR
+			ap.play(pick)
+		return
 
 func _square_ring_point(f: float, r: float) -> Vector3:
 	# Punto repartido uniforme sobre el borde de un cuadrado de semilado r.
