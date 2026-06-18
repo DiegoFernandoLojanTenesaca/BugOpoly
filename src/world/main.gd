@@ -59,10 +59,7 @@ func _setup_world() -> void:
 	env.ambient_light_energy = 1.0
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = 1.35
-	env.ssao_enabled = true
-	env.ssao_radius = 1.1
-	env.ssao_intensity = 0.9
-	env.ssao_power = 1.4
+	env.ssao_enabled = false  # SSAO no está soportado en el renderer Mobile
 	env.glow_enabled = true
 	env.glow_intensity = 0.10
 	env.glow_bloom = 0.0

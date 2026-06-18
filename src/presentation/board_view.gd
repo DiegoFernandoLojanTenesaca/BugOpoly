@@ -183,7 +183,7 @@ func _build_monster_crowd() -> void:
 	# Monstruos bailando alrededor del tablero (variedad: no solo zombies).
 	var crowd := ["cyclops", "bee", "ghost", "crab", "demon", "penguin", "skull", "panda", "bat", "mushroom"]
 	var cols := [Brand.RED, Brand.GOLD, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[2], Brand.GROUP[3], Brand.GROUP[5], Brand.WHITE, Brand.GROUP[4], Brand.GOLD_HI]
-	var r := _outer + 3.4
+	var r := _outer + 2.6
 	for i in crowd.size():
 		var ang := float(i) / float(crowd.size()) * TAU + 0.39
 		var pos := Vector3(cos(ang) * r, 0, sin(ang) * r)
@@ -637,9 +637,11 @@ func _bill_tex(value: int) -> Texture2D:
 
 func _bill_svg(value: int) -> String:
 	var st := _bill_style(value)
-	var ph := "#" + st[0].to_html(false)
-	var ih := "#" + st[1].to_html(false)
-	var lite := "#" + st[0].lightened(0.4).to_html(false)
+	var paper: Color = st[0]
+	var ink: Color = st[1]
+	var ph := "#" + paper.to_html(false)
+	var ih := "#" + ink.to_html(false)
+	var lite := "#" + paper.lightened(0.4).to_html(false)
 	var icons := {
 		10: '<circle cx="12" cy="12" r="7"/><path d="M22 22 17 17"/>',
 		50: '<ellipse cx="12" cy="13.5" rx="5" ry="6"/><circle cx="12" cy="6" r="2.1"/><path d="M12 8v11"/><path d="M10.3 4.4 8.6 2.6M13.7 4.4 15.4 2.6"/>',
