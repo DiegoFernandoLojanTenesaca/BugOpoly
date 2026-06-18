@@ -386,7 +386,7 @@ func _resolve_card(p, tile: Dictionary) -> void:
 		return
 	var e: Dictionary = entries[randi() % entries.size()]
 	var money := int(e.get("money", 0))
-	board_view.draw_card(str(deck.get("kind", "bug")), str(e.get("text", "")))
+	hud.show_card(str(deck.get("kind", "bug")), str(e.get("text", "")))
 	AudioManager.play("card")
 	await _wait(1.0)
 	p.budget += money

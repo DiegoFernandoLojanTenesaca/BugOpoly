@@ -21,6 +21,7 @@ var _popup: PanelContainer
 var _popup_box: VBoxContainer
 var _abilities_box: HBoxContainer
 var _pause_root: Control
+var _card_overlay: Control
 
 func setup(state) -> void:
 	_state = state
@@ -409,6 +410,126 @@ func show_challenge(ch: Dictionary) -> void:
 		b.pressed.connect(func(): _popup.visible = false; challenge_answer.emit(i))
 		_popup_box.add_child(b)
 	_popup.visible = true
+
+func show_card(kind: String, text: String) -> void:
+	# Carta 2D estilo Art Kit: Bug Report (naranja) / Retro (azul). Centrada y animada.
+	if _card_overlay != null:
+		_card_overlay.queue_free()
+		_card_overlay = null
+	var bug := kind == "bug"
+	var base := Color.html("#E08A1E") if bug else Color.html("#2E6FB0")
+	var ink := Color.html("#14110E") if bug else Brand.WHITE
+	var kicker_col := Color.html("#5e3708") if bug else Color.html("#bcd8f2")
+	var title := "BUG" if bug else "RETRO"
+	var subtitle := "REPORT" if bug else "SACA · APRENDE · MEJORA"
+
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.gui_input.connect(_on_card_input)
+	add_child(root)
+	_card_overlay = root
+	var dim := ColorRect.new()
+	dim.color = Color(0.03, 0.02, 0.02, 0.46)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(384, 524)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = base
+	sb.set_corner_radius_all(22)
+	sb.border_color = Color(0, 0, 0, 0.45)
+	sb.set_border_width_all(3)
+	sb.shadow_color = Color(0, 0, 0, 0.45)
+	sb.shadow_size = 22
+	sb.set_content_margin_all(28)
+	card.add_theme_stylebox_override("panel", sb)
+	center.add_child(card)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 10)
+	card.add_child(vb)
+
+	var kicker := Label.new()
+	kicker.text = "BUGOPOLY · MAZO"
+	kicker.add_theme_font_override("font", Brand.font_heavy())
+	kicker.add_theme_font_size_override("font_size", 13)
+	kicker.add_theme_color_override("font_color", kicker_col)
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(kicker)
+
+	var spacer_top := Control.new()
+	spacer_top.custom_minimum_size = Vector2(0, 8)
+	vb.add_child(spacer_top)
+
+	var title_l := Label.new()
+	title_l.text = title
+	title_l.add_theme_font_override("font", Brand.font_display())
+	title_l.add_theme_font_size_override("font_size", 84)
+	title_l.add_theme_color_override("font_color", ink)
+	title_l.add_theme_constant_override("shadow_offset_x", 3)
+	title_l.add_theme_constant_override("shadow_offset_y", 3)
+	title_l.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.30) if bug else Color(0, 0, 0, 0.35))
+	title_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(title_l)
+
+	var sub_l := Label.new()
+	sub_l.text = subtitle
+	sub_l.add_theme_font_override("font", Brand.font_heavy())
+	sub_l.add_theme_font_size_override("font_size", 15)
+	sub_l.add_theme_color_override("font_color", kicker_col)
+	sub_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(sub_l)
+
+	var spacer_mid := Control.new()
+	spacer_mid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vb.add_child(spacer_mid)
+
+	var body := PanelContainer.new()
+	var bsb := StyleBoxFlat.new()
+	bsb.bg_color = Color(0.08, 0.06, 0.05, 0.30)
+	bsb.set_corner_radius_all(12)
+	bsb.set_content_margin_all(16)
+	bsb.border_color = Color(1, 1, 1, 0.28)
+	bsb.set_border_width_all(1)
+	body.add_theme_stylebox_override("panel", bsb)
+	vb.add_child(body)
+	var text_l := Label.new()
+	text_l.text = text
+	text_l.add_theme_font_size_override("font_size", 19)
+	text_l.add_theme_color_override("font_color", Brand.CREAM if not bug else Color(0.13, 0.10, 0.07))
+	text_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	text_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text_l.custom_minimum_size = Vector2(300, 0)
+	body.add_child(text_l)
+
+	# animación de entrada + auto-cierre
+	card.pivot_offset = card.custom_minimum_size * 0.5
+	card.scale = Vector2(0.7, 0.7)
+	card.rotation = deg_to_rad(-5)
+	root.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(root, "modulate:a", 1.0, 0.18)
+	tw.parallel().tween_property(card, "scale", Vector2.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(card, "rotation", 0.0, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(2.3)
+	tw.tween_callback(_dismiss_card)
+
+func _on_card_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.is_pressed():
+		_dismiss_card()
+
+func _dismiss_card() -> void:
+	if _card_overlay == null:
+		return
+	var o := _card_overlay
+	_card_overlay = null
+	var tw := create_tween()
+	tw.tween_property(o, "modulate:a", 0.0, 0.22)
+	tw.tween_callback(o.queue_free)
 
 func show_gameover(state) -> void:
 	var root := Control.new()
