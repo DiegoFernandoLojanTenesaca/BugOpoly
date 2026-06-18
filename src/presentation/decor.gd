@@ -23,14 +23,20 @@ func build(board_half: float) -> void:
 	_chase("shaun", "zombie_basic", bz, 0.55, 0.0, bh + 13.0)
 	_fight("sam", "Slash", "zombie_chubby", "Attack", Vector3(bh + 7.0, 0, bz - 2.0))
 	_runner(_load_char("pug", "Run", 3.0), bz - 3.0, 0.9, 1.5, bh + 12.0)
-	# espectadores idle que enmarcan el tablero (a los lados y atrás, sin tapar la vista)
-	_spectator("sam", Vector3(-(bh + 2.8), 0, 2.5))
-	_spectator("shaun", Vector3(bh + 2.8, 0, -1.5))
-	_spectator("zombie_basic", Vector3(-3.0, 0, -(bh + 2.8)))
-	_spectator("zombie_chubby", Vector3(3.5, 0, -(bh + 2.8)))
+	# espectadores haciendo algo (saludan, asienten, pelean), enmarcando el tablero
+	var bh2 := bh + 2.9
+	_spectator("sam", "Wave", Vector3(-bh2, 0, 3.0))
+	_spectator("shaun", "Yes", Vector3(bh2, 0, -2.0))
+	_spectator("zombie_basic", "Idle_Attack", Vector3(-3.5, 0, -bh2))
+	_spectator("zombie_chubby", "Wave", Vector3(3.5, 0, -bh2))
+	_spectator("sam", "Punch", Vector3(-bh2, 0, -3.5))
+	_spectator("shaun", "Wave", Vector3(bh2, 0, 4.0))
+	_spectator("zombie_basic", "Idle", Vector3(bh2, 0, -5.2))
+	_spectator("zombie_chubby", "Idle_Attack", Vector3(-bh2, 0, -0.5))
+	_spectator("pug", "Idle_2", Vector3(0.0, 0, -bh2))
 
-func _spectator(name: String, pos: Vector3) -> void:
-	var n := _load_char(name, "Idle", 2.2)
+func _spectator(name: String, anim: String, pos: Vector3) -> void:
+	var n := _load_char(name, anim, 2.2)
 	if n == null:
 		return
 	n.position = pos
@@ -61,7 +67,10 @@ func _runner(node: Node3D, z: float, speed: float, phase: float, range: float) -
 	_runners.append({"node": node, "z": z, "speed": speed, "phase": phase, "range": range})
 
 func _load_char(name: String, anim: String, scale: float) -> Node3D:
-	var abs_path := ProjectSettings.globalize_path(CHARS + name + ".gltf")
+	return _load_gltf(CHARS + name + ".gltf", anim, scale)
+
+func _load_gltf(path: String, anim: String, scale: float) -> Node3D:
+	var abs_path := ProjectSettings.globalize_path(path)
 	if not FileAccess.file_exists(abs_path):
 		return null
 	var doc := GLTFDocument.new()
@@ -79,11 +88,19 @@ func _load_char(name: String, anim: String, scale: float) -> Node3D:
 	var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
 	if not aps.is_empty():
 		var ap: AnimationPlayer = aps[0]
+		var list := ap.get_animation_list()
 		var pick := ""
-		for a in ap.get_animation_list():
+		for a in list:
 			if anim.to_lower() in str(a).to_lower():
 				pick = a
 				break
+		if pick == "":
+			for a in list:
+				if "idle" in str(a).to_lower():
+					pick = a
+					break
+		if pick == "" and list.size() > 0:
+			pick = list[0]
 		if pick != "":
 			ap.get_animation(pick).loop_mode = Animation.LOOP_LINEAR
 			ap.play(pick)

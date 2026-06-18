@@ -96,14 +96,6 @@ func build(state) -> void:
 
 	_build_diorama()
 
-	_beacon = MeshInstance3D.new()
-	var bsph := SphereMesh.new()
-	bsph.radius = 0.22
-	bsph.height = 0.44
-	_beacon.mesh = bsph
-	_beacon.material_override = _emissive(Color(1.0, 0.32, 0.26), 4.5)
-	add_child(_beacon)
-
 	for i in tiles.size():
 		_build_tile(i, tiles[i])
 
@@ -493,16 +485,17 @@ func fly_bills(from: Vector3, to: Vector3, count: int) -> void:
 	for k in count:
 		var value: int = [10, 50, 100, 500, 1000][randi() % 5]
 		var bill := _make_bill(value)
-		bill.scale = Vector3(1.7, 1.7, 1.7)
+		bill.scale = Vector3(1.2, 1.2, 1.2)
 		bill.position = from + Vector3(0, 0.8, 0)
 		add_child(bill)
-		# suben alto sobre el centro del tablero (bien visibles), pausan y caen al destino
-		var apex := Vector3(randf_range(-1.3, 1.3), 5.0 + k * 0.35, 1.2 + randf_range(-0.7, 0.7))
+		# vuelan hacia la pantalla (frente + alto), crecen grandes, pausan y caen al destino
+		var apex := Vector3(randf_range(-2.0, 2.0), 5.3 + k * 0.3, 5.0 + randf_range(-0.8, 0.8))
 		var tw := create_tween()
 		tw.tween_interval(k * 0.08)
 		tw.tween_property(bill, "position", apex, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(bill, "scale", Vector3(2.6, 2.6, 2.6), 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.parallel().tween_property(bill, "rotation_degrees", bill.rotation_degrees + Vector3(0, 180, 0), 0.5)
-		tw.tween_interval(0.4)
+		tw.tween_interval(0.45)
 		tw.tween_property(bill, "position", to + Vector3(0, 0.5, 0), 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 		tw.parallel().tween_property(bill, "scale", Vector3.ZERO, 0.5)
 		tw.tween_callback(bill.queue_free)

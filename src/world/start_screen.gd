@@ -541,8 +541,24 @@ func _prop_bill() -> Control:
 	ssb.border_color = Color.html("#8a6f08")
 	ssb.set_border_width_all(2)
 	seal.add_theme_stylebox_override("panel", ssb)
+	var medal := _kit_icon("trophy", Color.html("#8a6f08"), 38)
+	medal.set_anchors_preset(Control.PRESET_FULL_RECT)
+	medal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	seal.add_child(medal)
 	hb.add_child(seal)
 	return bill
+
+func _kit_icon(name: String, col: Color, size: int) -> TextureRect:
+	var tr := TextureRect.new()
+	tr.custom_minimum_size = Vector2(size, size)
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var path := "res://assets/bugopoly/icons/%s.svg" % name
+	if FileAccess.file_exists(path):
+		var svg := FileAccess.get_file_as_string(path).replace("currentColor", "#" + col.to_html(false))
+		var img := Image.new()
+		if img.load_svg_from_string(svg, float(size) / 24.0 * 2.0) == OK:
+			tr.texture = ImageTexture.create_from_image(img)
+	return tr
 
 func _sway(c: Control, amp: float, dur: float) -> void:
 	var y0 := c.position.y
