@@ -69,28 +69,24 @@ const GH_USER := "DiegoFernandoLojanTenesaca"
 const AVATAR_URL := "https://avatars.githubusercontent.com/u/59341390?s=160"
 
 func _build_icon_bg() -> void:
-	# Iconos de programación/DB/QA flotando tenues en el fondo oscuro.
-	var icons := ["database", "terminal", "git-branch", "bug", "server", "gear", "shield", "rocket", "coffee", "search", "trophy", "coins", "lock", "circle-check"]
-	var cols := [Brand.GOLD, Brand.RED, Brand.GROUP[0], Brand.GROUP[1], Brand.GROUP[5], Brand.GROUP[2]]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1337
-	for i in 18:
-		var tr := _kit_icon(icons[i % icons.size()], cols[i % cols.size()], 96)
-		var sz := rng.randf_range(46.0, 104.0)
-		tr.custom_minimum_size = Vector2(sz, sz)
-		tr.size = Vector2(sz, sz)
-		tr.modulate.a = rng.randf_range(0.05, 0.11)
+	# Pocos iconos de DB/QA/código, chicos y tenues, solo en los bordes oscuros.
+	var spots := [
+		["database", Vector2(150, 250)], ["terminal", Vector2(135, 500)],
+		["git-branch", Vector2(360, 655)], ["server", Vector2(660, 115)],
+		["bug", Vector2(845, 135)], ["shield", Vector2(560, 665)],
+	]
+	for sp in spots:
+		var tr := _kit_icon(sp[0], Brand.TEXT_MUTED, 64)
+		tr.custom_minimum_size = Vector2(44, 44)
+		tr.size = Vector2(44, 44)
+		tr.modulate.a = 0.07
 		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tr.pivot_offset = Vector2(sz * 0.5, sz * 0.5)
-		tr.rotation = rng.randf_range(-0.3, 0.3)
-		var y := rng.randf_range(-20.0, 700.0)
-		tr.position = Vector2(rng.randf_range(-20.0, 1240.0), y)
+		var pos: Vector2 = sp[1]
+		tr.position = pos
 		add_child(tr)
-		var drift := rng.randf_range(12.0, 30.0)
-		var dur := rng.randf_range(6.0, 12.0)
 		var tw := create_tween().set_loops()
-		tw.tween_property(tr, "position:y", y - drift, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw.tween_property(tr, "position:y", y, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(tr, "position:y", pos.y - 14.0, 8.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(tr, "position:y", pos.y, 8.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _build_creator_badge() -> void:
 	# Guiño al creador: avatar de GitHub (dinámico) + nombre. Click abre el perfil; triple-click = easter egg.
