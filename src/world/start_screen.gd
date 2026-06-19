@@ -15,6 +15,8 @@ var _sub: Label
 var _menu: VBoxContainer
 var _players_overlay: Control = null
 var _scene_t := 0.0
+var _badge_clicks := 0
+var _badge_timer: Timer
 var _scene_mons: Array = []     # monstruos que giran en el tablero de fondo
 var _scene_runners: Array = []  # personajes corriendo de lado a lado
 
@@ -27,6 +29,7 @@ func _ready() -> void:
 	_build_title()
 	_build_main_menu()
 	_build_props()
+	_build_creator_badge()
 	_animate_in()
 
 func _apply_window_icon() -> void:
@@ -59,6 +62,117 @@ func _build_background() -> void:
 	var gtw := create_tween().set_loops()
 	gtw.tween_property(tex, "fill_from", Vector2(0.4, 0.34), 7.0).set_trans(Tween.TRANS_SINE)
 	gtw.tween_property(tex, "fill_from", Vector2(0.6, 0.46), 7.0).set_trans(Tween.TRANS_SINE)
+
+const GH_USER := "DiegoFernandoLojanTenesaca"
+
+func _build_creator_badge() -> void:
+	# Guiño al creador: avatar de GitHub (dinámico) + nombre. Click abre el perfil; triple-click = easter egg.
+	var badge := PanelContainer.new()
+	badge.position = Vector2(1032, 16)
+	var bsb := StyleBoxFlat.new()
+	bsb.bg_color = Color(0.10, 0.08, 0.07, 0.62)
+	bsb.set_corner_radius_all(22)
+	bsb.set_content_margin_all(7)
+	bsb.border_color = Color(Brand.GOLD.r, Brand.GOLD.g, Brand.GOLD.b, 0.4)
+	bsb.set_border_width_all(1)
+	badge.add_theme_stylebox_override("panel", bsb)
+	badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	badge.gui_input.connect(_on_badge_input)
+	add_child(badge)
+
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 9)
+	hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.add_child(hb)
+
+	var avp := Panel.new()
+	avp.custom_minimum_size = Vector2(40, 40)
+	avp.clip_contents = true
+	var asb := StyleBoxFlat.new()
+	asb.bg_color = Brand.GOLD
+	asb.set_corner_radius_all(20)
+	avp.add_theme_stylebox_override("panel", asb)
+	avp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hb.add_child(avp)
+	var av := TextureRect.new()
+	av.set_anchors_preset(Control.PRESET_FULL_RECT)
+	av.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	av.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	avp.add_child(av)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 0)
+	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hb.add_child(vb)
+	var k := Label.new()
+	k.text = "creado por"
+	k.add_theme_font_size_override("font_size", 10)
+	k.add_theme_color_override("font_color", Brand.TEXT_MUTED)
+	vb.add_child(k)
+	var nm := Label.new()
+	nm.text = "Fernando Loján"
+	nm.add_theme_font_override("font", Brand.font_heavy())
+	nm.add_theme_font_size_override("font_size", 14)
+	nm.add_theme_color_override("font_color", Brand.TEXT_STRONG)
+	vb.add_child(nm)
+
+	_badge_timer = Timer.new()
+	_badge_timer.one_shot = true
+	_badge_timer.wait_time = 0.45
+	_badge_timer.timeout.connect(_badge_resolve)
+	add_child(_badge_timer)
+
+	var http := HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(_on_avatar.bind(av))
+	http.request("https://github.com/%s.png" % GH_USER)
+
+func _on_badge_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		_badge_clicks += 1
+		_badge_timer.start()
+
+func _badge_resolve() -> void:
+	if _badge_clicks >= 3:
+		_show_egg()
+	else:
+		OS.shell_open("https://github.com/%s" % GH_USER)
+	_badge_clicks = 0
+
+func _on_avatar(result: int, code: int, _headers: PackedStringArray, body: PackedByteArray, av: TextureRect) -> void:
+	if result != HTTPRequest.RESULT_SUCCESS or code != 200:
+		return
+	var img := Image.new()
+	if img.load_png_from_buffer(body) != OK and img.load_jpg_from_buffer(body) != OK:
+		return
+	av.texture = ImageTexture.create_from_image(img)
+
+func _show_egg() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	var dim := ColorRect.new()
+	dim.color = Color(0.03, 0.01, 0.02, 0.0)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var l := Label.new()
+	l.text = "con amor para BAE"
+	l.add_theme_font_override("font", Brand.font_display())
+	l.add_theme_font_size_override("font_size", 66)
+	l.add_theme_color_override("font_color", Brand.RED)
+	l.add_theme_constant_override("outline_size", 14)
+	l.add_theme_color_override("font_outline_color", Color("1c0807"))
+	center.add_child(l)
+	root.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(dim, "color:a", 0.6, 0.3)
+	tw.parallel().tween_property(root, "modulate:a", 1.0, 0.3)
+	tw.tween_interval(2.4)
+	tw.tween_property(root, "modulate:a", 0.0, 0.7)
+	tw.tween_callback(root.queue_free)
 
 func _build_title() -> void:
 	_title_parts.clear()
