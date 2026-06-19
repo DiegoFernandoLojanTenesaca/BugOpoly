@@ -31,7 +31,9 @@ Hecho con **Godot Engine 4.6**. Jugable en multijugador local (hot-seat con bots
 - **Vida en el tablero**: multitud de monstruos bailando + espectadores animados (saludan, pelean) alrededor; cámara con órbita lenta; anillo en la ficha del turno.
 - **Pantalla de fin de partida** con stats y logros.
 - **Menú**: título con extrude 3D, mini-tablero con monstruos bailando, baraja Bug/Retro y billete QA Credits de marca, música, y secciones de Ayuda y Créditos.
-- **Opciones** de audio (música / sonidos / voces por separado) y de gráficos (antialiasing, escala de render, sombras, glow, fullscreen, vsync).
+- **Comercio entre jugadores**: proponé intercambios (una propiedad por otra + pago extra); el rival acepta si le conviene.
+- **Panel de propiedades** (módulos por jugador con cobertura y renta) y **log lateral** persistente de jugadas.
+- **Opciones** de audio (música / sonidos / voces por separado) y de gráficos (antialiasing, escala de render, sombras, glow, fullscreen, vsync), que **se guardan en disco** entre partidas.
 - **App icon propio** (cíclope de marca) y **optimizado para GPU integrada** (renderer Mobile, carga lazy, caché de materiales y texturas).
 - **Data-driven y moddeable**: tablero, cartas, retos, fichas y subsistemas viven en JSON bajo `data/` y `mods/`.
 
@@ -110,10 +112,11 @@ assets/bugopoly/ modelos, sonidos, música, texturas, iconos, fuentes
 - [x] Título del menú con extrude 3D + app icon de marca.
 - [x] Cartas (Bug/Retro/propiedad) y billetes "QA Credits" in-game con el Art Kit.
 - [x] Tractor de construcción, multitud de monstruos y espectadores animados.
+- [x] Comercio entre jugadores, panel de propiedades y log lateral.
+- [x] Guardar opciones (audio/gráficos) en disco; +13 retos QA (30+ en total).
 - [ ] Capturas de pantalla y GIF de gameplay.
-- [ ] Más retos QA y cartas.
-- [ ] Comercio entre jugadores (ofrecer/intercambiar propiedades).
-- [ ] Guardar opciones (audio/gráficos) en disco.
+- [ ] Más cartas y eventos; balance de partida.
+- [ ] Build exportado descargable (preset listo en `export_presets.cfg`).
 
 ## Créditos / licencias de assets
 
