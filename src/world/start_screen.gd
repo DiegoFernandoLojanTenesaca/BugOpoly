@@ -15,8 +15,8 @@ var _sub: Label
 var _menu: VBoxContainer
 var _players_overlay: Control = null
 var _scene_t := 0.0
-var _badge_clicks := 0
-var _badge_timer: Timer
+var _egg_clicks := 0
+var _egg_timer: Timer
 var _scene_mons: Array = []     # monstruos que giran en el tablero de fondo
 var _scene_runners: Array = []  # personajes corriendo de lado a lado
 
@@ -30,6 +30,7 @@ func _ready() -> void:
 	_build_main_menu()
 	_build_props()
 	_build_creator_badge()
+	_build_monster_clicker()
 	_animate_in()
 
 func _apply_window_icon() -> void:
@@ -97,6 +98,10 @@ func _build_creator_badge() -> void:
 	hb.add_child(avp)
 	var av := TextureRect.new()
 	av.set_anchors_preset(Control.PRESET_FULL_RECT)
+	av.offset_left = 2
+	av.offset_top = 2
+	av.offset_right = -2
+	av.offset_bottom = -2
 	av.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	av.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	av.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -118,12 +123,6 @@ func _build_creator_badge() -> void:
 	nm.add_theme_color_override("font_color", Brand.TEXT_STRONG)
 	vb.add_child(nm)
 
-	_badge_timer = Timer.new()
-	_badge_timer.one_shot = true
-	_badge_timer.wait_time = 0.45
-	_badge_timer.timeout.connect(_badge_resolve)
-	add_child(_badge_timer)
-
 	var http := HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_avatar.bind(av))
@@ -131,15 +130,31 @@ func _build_creator_badge() -> void:
 
 func _on_badge_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-		_badge_clicks += 1
-		_badge_timer.start()
-
-func _badge_resolve() -> void:
-	if _badge_clicks >= 3:
-		_show_egg()
-	else:
 		OS.shell_open("https://github.com/%s" % GH_USER)
-	_badge_clicks = 0
+
+func _build_monster_clicker() -> void:
+	# Zona invisible sobre los muñecos: triple-click = easter egg.
+	var hot := Control.new()
+	hot.position = Vector2(300, 230)
+	hot.size = Vector2(560, 380)
+	hot.mouse_filter = Control.MOUSE_FILTER_STOP
+	hot.gui_input.connect(_on_monster_input)
+	add_child(hot)
+	_egg_timer = Timer.new()
+	_egg_timer.one_shot = true
+	_egg_timer.wait_time = 0.6
+	_egg_timer.timeout.connect(_egg_resolve)
+	add_child(_egg_timer)
+
+func _on_monster_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		_egg_clicks += 1
+		_egg_timer.start()
+
+func _egg_resolve() -> void:
+	if _egg_clicks >= 3:
+		_show_egg()
+	_egg_clicks = 0
 
 func _on_avatar(result: int, code: int, _headers: PackedStringArray, body: PackedByteArray, av: TextureRect) -> void:
 	if result != HTTPRequest.RESULT_SUCCESS or code != 200:
@@ -147,7 +162,26 @@ func _on_avatar(result: int, code: int, _headers: PackedStringArray, body: Packe
 	var img := Image.new()
 	if img.load_png_from_buffer(body) != OK and img.load_jpg_from_buffer(body) != OK:
 		return
+	img.resize(128, 128, Image.INTERPOLATE_LANCZOS)
+	_circle_mask(img)
 	av.texture = ImageTexture.create_from_image(img)
+
+func _circle_mask(img: Image) -> void:
+	img.convert(Image.FORMAT_RGBA8)
+	var w := img.get_width()
+	var h := img.get_height()
+	var cx := w * 0.5
+	var cy := h * 0.5
+	var r := minf(cx, cy)
+	for y in h:
+		for x in w:
+			var dx := float(x) + 0.5 - cx
+			var dy := float(y) + 0.5 - cy
+			var a := clampf(r - sqrt(dx * dx + dy * dy), 0.0, 1.0)
+			if a < 1.0:
+				var c := img.get_pixel(x, y)
+				c.a = a
+				img.set_pixel(x, y, c)
 
 func _show_egg() -> void:
 	var root := Control.new()
