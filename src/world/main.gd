@@ -38,6 +38,7 @@ func _ready() -> void:
 	hud.debug = autoplay
 	hud.roll_pressed.connect(_on_roll_pressed)
 	hud.ability_used.connect(_on_ability)
+	hud.trade_proposed.connect(_on_trade)
 
 	hud.log_line("[b]Bugopoly[/b] — empieza la partida.")
 	_begin_turn()
@@ -428,6 +429,50 @@ func _resolve_challenge(p, tile: Dictionary) -> void:
 	var verdict := "✓ Correcto" if correct else "✗ Incorrecto"
 	hud.log_line("%s, reto QA: %s. [i]%s[/i]" % [p.pname, verdict, str(ch.get("explain", ""))])
 	await _wait(0.5)
+
+func _on_trade(give_idx: int, get_idx: int, money: int) -> void:
+	var me = GameState.current_player()
+	if me.is_bot:
+		return
+	var target_id := GameState.owner_of(get_idx)
+	if target_id < 0:
+		return
+	var target = GameState.players[target_id]
+	if target.id == me.id or target.bankrupt:
+		return
+	if not (give_idx in me.owned) or not (get_idx in target.owned):
+		hud.log_line("Trato inválido.")
+		return
+	if me.budget < money:
+		hud.log_line("No te alcanza para ese pago extra.")
+		return
+	# El target acepta si lo que recibe vale >= lo que entrega.
+	var give_val := _prop_value(give_idx) + money
+	var get_val := _prop_value(get_idx)
+	if float(give_val) < float(get_val) * 0.95:
+		hud.log_line("%s rechaza el trato." % str(target.pname))
+		AudioManager.play("blip")
+		return
+	GameState.ownership[give_idx] = target.id
+	GameState.ownership[get_idx] = me.id
+	me.owned.erase(give_idx)
+	me.owned.append(get_idx)
+	target.owned.erase(get_idx)
+	target.owned.append(give_idx)
+	me.budget -= money
+	target.budget += money
+	board_view.set_houses(give_idx, GameState.house_count(give_idx), target.color)
+	board_view.set_houses(get_idx, GameState.house_count(get_idx), me.color)
+	AudioManager.play("buy")
+	hud.refresh()
+	var tiles: Array = GameState.tiles()
+	var extra := (" + $%d" % money) if money > 0 else ""
+	hud.log_line("Trato cerrado: %s ↔ %s%s con %s." % [str(tiles[give_idx].get("name", "")), str(tiles[get_idx].get("name", "")), extra, str(target.pname)])
+
+func _prop_value(idx: int) -> int:
+	var tile: Dictionary = GameState.tiles()[idx]
+	var price := int(tile.get("price", 0))
+	return price + GameState.house_count(idx) * int(price * 0.5)
 
 func _float(p, amount: int) -> void:
 	if amount == 0:

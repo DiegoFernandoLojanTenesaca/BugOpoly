@@ -25,6 +25,7 @@ signal property_decision(buy)
 signal build_decision(build)
 signal challenge_answer(index)
 signal ability_used(name)
+signal trade_proposed(give_idx, get_idx, money)
 
 var debug := false
 var _state
@@ -62,6 +63,15 @@ func setup(state) -> void:
 	Brand.style_button(props_btn, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
 	props_btn.pressed.connect(_show_properties)
 	add_child(props_btn)
+
+	var trade_btn := Button.new()
+	trade_btn.text = "Comerciar"
+	trade_btn.position = Vector2(884, 14)
+	trade_btn.size = Vector2(126, 36)
+	trade_btn.add_theme_font_size_override("font_size", 14)
+	Brand.style_button(trade_btn, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
+	trade_btn.pressed.connect(_show_trade)
+	add_child(trade_btn)
 
 	# Log lateral persistente (las últimas jugadas)
 	var log_panel := PanelContainer.new()
@@ -698,6 +708,98 @@ func _show_properties() -> void:
 	var close := _btn("CERRAR", Brand.RED)
 	close.pressed.connect(root.queue_free)
 	vb.add_child(close)
+
+func _show_trade() -> void:
+	var me = _state.current_player()
+	if me.is_bot:
+		log_line("Esperá tu turno para comerciar.")
+		return
+	var tiles: Array = _state.tiles()
+	var mine: Array = me.owned.duplicate()
+	var theirs: Array = []
+	for op in _state.players:
+		if op.id == me.id or op.bankrupt:
+			continue
+		for idx in op.owned:
+			theirs.append({"idx": idx, "owner": op})
+	if mine.is_empty() or theirs.is_empty():
+		log_line("No hay propiedades para intercambiar todavía.")
+		return
+
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(root)
+	var dim := ColorRect.new()
+	dim.color = Color(0.04, 0.03, 0.03, 0.72)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(560, 0)
+	panel.add_theme_stylebox_override("panel", _panel_style(Brand.SURFACE_CARD))
+	center.add_child(panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 12)
+	panel.add_child(vb)
+	var t := _title("COMERCIAR")
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(t)
+	vb.add_child(HSeparator.new())
+
+	var give_ob := OptionButton.new()
+	for idx in mine:
+		give_ob.add_item(str(tiles[idx].get("name", "")))
+		give_ob.set_item_metadata(give_ob.item_count - 1, idx)
+	vb.add_child(_trade_row("Doy", give_ob))
+
+	var get_ob := OptionButton.new()
+	for e in theirs:
+		var idx: int = e["idx"]
+		get_ob.add_item("%s · %s" % [str(e["owner"].pname), str(tiles[idx].get("name", ""))])
+		get_ob.set_item_metadata(get_ob.item_count - 1, idx)
+	vb.add_child(_trade_row("Quiero", get_ob))
+
+	var money_sb := SpinBox.new()
+	money_sb.min_value = 0
+	money_sb.max_value = me.budget
+	money_sb.step = 10
+	vb.add_child(_trade_row("Pago extra ($)", money_sb))
+
+	vb.add_child(HSeparator.new())
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	vb.add_child(row)
+	var prop := _btn("PROPONER", Brand.GROUP[1])
+	prop.pressed.connect(_on_trade_propose.bind(give_ob, get_ob, money_sb, root))
+	row.add_child(prop)
+	var cancel := _btn("CANCELAR", Brand.SURFACE_RAISED)
+	cancel.pressed.connect(root.queue_free)
+	row.add_child(cancel)
+
+func _trade_row(label: String, control: Control) -> HBoxContainer:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 12)
+	var l := Label.new()
+	l.text = label
+	l.custom_minimum_size = Vector2(140, 0)
+	l.add_theme_color_override("font_color", Brand.TEXT_BODY)
+	h.add_child(l)
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(control)
+	return h
+
+func _on_trade_propose(give_ob: OptionButton, get_ob: OptionButton, money_sb: SpinBox, root: Control) -> void:
+	if give_ob.get_selected() < 0 or get_ob.get_selected() < 0:
+		return
+	var gi: int = give_ob.get_item_metadata(give_ob.get_selected())
+	var ti: int = get_ob.get_item_metadata(get_ob.get_selected())
+	var money := int(money_sb.value)
+	root.queue_free()
+	trade_proposed.emit(gi, ti, money)
 
 func _rent_of(tile: Dictionary, idx: int) -> int:
 	var base := int(tile.get("rent", int(int(tile.get("price", 0)) * 0.1)))
