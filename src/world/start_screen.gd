@@ -125,7 +125,7 @@ func _build_creator_badge() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_avatar.bind(av))
-	http.request("https://github.com/%s.png" % GH_USER)
+	http.call_deferred("request", "https://github.com/%s.png" % GH_USER)
 
 func _on_badge_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
