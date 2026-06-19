@@ -16,6 +16,10 @@ Juego de mesa digital en 3D con temática de **QA de software y programación**.
 
 Hecho con **Godot Engine 4.6**. Jugable en multijugador local (hot-seat con bots) y en modo autoplay.
 
+<p align="center">
+  <img src="docs/screenshots/menu.png" alt="Menú de Bugopoly" width="88%">
+</p>
+
 ## Características
 
 - **Tablero 3D** estilo juego de mesa premium, 40 casillas, con fichas-monstruo animadas (**21 para elegir**) y centro oscuro con logo + ciudad de software.
@@ -114,7 +118,7 @@ assets/bugopoly/ modelos, sonidos, música, texturas, iconos, fuentes
 - [x] Tractor de construcción, multitud de monstruos y espectadores animados.
 - [x] Comercio entre jugadores, panel de propiedades y log lateral.
 - [x] Guardar opciones (audio/gráficos) en disco; +13 retos QA (30+ en total).
-- [ ] Capturas de pantalla y GIF de gameplay.
+- [x] Captura del menú en el README (faltan GIF de gameplay y del tablero).
 - [ ] Más cartas y eventos; balance de partida.
 - [ ] Build exportado descargable (preset listo en `export_presets.cfg`).
 
