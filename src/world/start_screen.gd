@@ -64,6 +64,7 @@ func _build_background() -> void:
 	gtw.tween_property(tex, "fill_from", Vector2(0.6, 0.46), 7.0).set_trans(Tween.TRANS_SINE)
 
 const GH_USER := "DiegoFernandoLojanTenesaca"
+const AVATAR_URL := "https://avatars.githubusercontent.com/u/59341390?s=160"
 
 func _build_creator_badge() -> void:
 	# Guiño al creador: avatar de GitHub (dinámico) + nombre. Click abre el perfil; triple-click = easter egg.
@@ -125,7 +126,7 @@ func _build_creator_badge() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_avatar.bind(av))
-	http.call_deferred("request", "https://github.com/%s.png" % GH_USER)
+	http.call_deferred("request", AVATAR_URL)
 
 func _on_badge_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
