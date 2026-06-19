@@ -4,6 +4,8 @@ extends Node
 
 const Brand = preload("res://src/ui/palette.gd")
 
+const CFG := "user://settings.cfg"
+
 var aa := 1            # 0 off · 1 FXAA · 2 MSAA 2x · 3 MSAA 4x
 var render_scale := 1.0
 var shadows := true
@@ -14,6 +16,32 @@ var vsync := true
 # Referencias de la escena de juego (las setea main.gd) para sombras/glow en vivo.
 var env: Environment = null
 var light: DirectionalLight3D = null
+
+func _ready() -> void:
+	_load()
+	call_deferred("apply")
+
+func _load() -> void:
+	var c := ConfigFile.new()
+	if c.load(CFG) != OK:
+		return
+	aa = c.get_value("gfx", "aa", aa)
+	render_scale = c.get_value("gfx", "render_scale", render_scale)
+	shadows = c.get_value("gfx", "shadows", shadows)
+	glow = c.get_value("gfx", "glow", glow)
+	fullscreen = c.get_value("gfx", "fullscreen", fullscreen)
+	vsync = c.get_value("gfx", "vsync", vsync)
+
+func _save() -> void:
+	var c := ConfigFile.new()
+	c.load(CFG)  # preserva la sección [audio]
+	c.set_value("gfx", "aa", aa)
+	c.set_value("gfx", "render_scale", render_scale)
+	c.set_value("gfx", "shadows", shadows)
+	c.set_value("gfx", "glow", glow)
+	c.set_value("gfx", "fullscreen", fullscreen)
+	c.set_value("gfx", "vsync", vsync)
+	c.save(CFG)
 
 func apply() -> void:
 	var vp := get_viewport()
@@ -37,6 +65,7 @@ func apply() -> void:
 		light.shadow_enabled = shadows
 	if env != null and is_instance_valid(env):
 		env.glow_enabled = glow
+	_save()
 
 # ---------- setters (conectados a la UI) ----------
 

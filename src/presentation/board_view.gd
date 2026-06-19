@@ -612,12 +612,6 @@ func _make_tractor() -> Node3D:
 			n.add_child(w)
 	return n
 
-func _make_flag(color: Color) -> Node3D:
-	var n := Node3D.new()
-	n.add_child(_part(_cyl(0.03, 0.03, 0.6), _glossy(Color(0.3, 0.3, 0.34)), Vector3(0, 0.3, 0)))
-	n.add_child(_part(_box(0.3, 0.2, 0.02), _glossy(color), Vector3(0.16, 0.5, 0)))
-	return n
-
 func _pop(node: Node3D) -> void:
 	var target: Vector3 = node.scale
 	node.scale = Vector3.ZERO

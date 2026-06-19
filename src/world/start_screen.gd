@@ -400,39 +400,6 @@ func _build_scene() -> void:
 		mi += 1
 	bv.free()
 
-func _bg_run(vp: SubViewport, name: String, phase: float) -> void:
-	var n := _bg_load_char(name)
-	if n == null:
-		return
-	vp.add_child(n)
-	_scene_runners.append({"node": n, "phase": phase})
-
-func _bg_load_char(name: String) -> Node3D:
-	var abs_path := ProjectSettings.globalize_path("res://assets/bugopoly/models/chars/" + name + ".gltf")
-	if not FileAccess.file_exists(abs_path):
-		return null
-	var doc := GLTFDocument.new()
-	var st := GLTFState.new()
-	if doc.append_from_file(abs_path, st) != OK:
-		return null
-	var inst: Node = doc.generate_scene(st)
-	if inst == null:
-		return null
-	var holder := Node3D.new()
-	var wrap := Node3D.new()
-	wrap.scale = Vector3(1.4, 1.4, 1.4)
-	wrap.add_child(inst)
-	holder.add_child(wrap)
-	var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
-	if not aps.is_empty():
-		var ap: AnimationPlayer = aps[0]
-		for a in ap.get_animation_list():
-			if "run" in str(a).to_lower():
-				ap.get_animation(a).loop_mode = Animation.LOOP_LINEAR
-				ap.play(a)
-				break
-	return holder
-
 func _build_props() -> void:
 	# Baraja (Bug/Retro) + billete QA Credits como props a la derecha, con balanceo.
 	var root := Control.new()
@@ -615,29 +582,6 @@ func _process(delta: float) -> void:
 		rn.position = Vector3(sin(ph) * 5.0, 0.0, -3.6)
 		rn.rotation.y = PI * 0.5 if cos(ph) >= 0.0 else -PI * 0.5
 
-func _build_ambient() -> void:
-	# Burbujas suaves de marca a la deriva (bokeh), detrás de la UI.
-	var cols := [Brand.GOLD, Brand.RED, Brand.GROUP[0], Brand.GROUP[5], Brand.GROUP[2]]
-	for i in 9:
-		var sz := randf_range(40.0, 120.0)
-		var dot := Panel.new()
-		dot.custom_minimum_size = Vector2(sz, sz)
-		dot.size = Vector2(sz, sz)
-		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var c: Color = cols[i % cols.size()]
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(c.r, c.g, c.b, 0.06)
-		sb.set_corner_radius_all(int(sz * 0.5))
-		dot.add_theme_stylebox_override("panel", sb)
-		var y0 := randf_range(40.0, 660.0)
-		dot.position = Vector2(randf_range(0.0, 1180.0), y0)
-		add_child(dot)
-		var drift := randf_range(10.0, 26.0)
-		var dur := randf_range(6.0, 12.0)
-		var tw := create_tween().set_loops()
-		tw.tween_property(dot, "position:y", y0 - drift, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw.tween_property(dot, "position:y", y0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-
 func _animate_in() -> void:
 	for p in _title_parts:
 		p.modulate.a = 0.0
@@ -653,9 +597,6 @@ func _animate_in() -> void:
 	t.parallel().tween_property(_sub, "modulate:a", 1.0, 0.45)
 	t.tween_property(_menu, "position:x", 60, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	t.parallel().tween_property(_menu, "modulate:a", 1.0, 0.45)
-
-func _scale_to(ctrl: Control, s: float) -> void:
-	create_tween().tween_property(ctrl, "scale", Vector2(s, s), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _on_add() -> void:
 	if _rows.size() < 4:

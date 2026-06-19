@@ -18,6 +18,7 @@ func _ready() -> void:
 	_ensure_bus("Music")
 	_ensure_bus("SFX")
 	_ensure_bus("Voice")
+	_load_volumes()
 	for s in SOUNDS:
 		var stream = _load_sound(s)
 		if stream != null:
@@ -122,3 +123,25 @@ func _set_bus_vol(v: float, bus: String) -> void:
 	var idx := AudioServer.get_bus_index(bus)
 	if idx >= 0:
 		AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(v, 0.0001)))
+		_save_volumes()
+
+const CFG := "user://settings.cfg"
+
+func _load_volumes() -> void:
+	var c := ConfigFile.new()
+	if c.load(CFG) != OK:
+		return
+	for bus in ["Music", "SFX", "Voice"]:
+		var idx := AudioServer.get_bus_index(bus)
+		if idx >= 0:
+			var v: float = c.get_value("audio", bus, 1.0)
+			AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(v, 0.0001)))
+
+func _save_volumes() -> void:
+	var c := ConfigFile.new()
+	c.load(CFG)  # preserva la sección [gfx]
+	for bus in ["Music", "SFX", "Voice"]:
+		var idx := AudioServer.get_bus_index(bus)
+		if idx >= 0:
+			c.set_value("audio", bus, db_to_linear(AudioServer.get_bus_volume_db(idx)))
+	c.save(CFG)
