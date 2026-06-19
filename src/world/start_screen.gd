@@ -97,7 +97,8 @@ func _build_creator_badge() -> void:
 	hb.add_child(avp)
 	var av := TextureRect.new()
 	av.set_anchors_preset(Control.PRESET_FULL_RECT)
-	av.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	av.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	av.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	av.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	avp.add_child(av)
 
