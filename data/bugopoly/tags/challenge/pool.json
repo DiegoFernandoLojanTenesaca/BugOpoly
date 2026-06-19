@@ -14,6 +14,19 @@
     "bugopoly:root_cause",
     "bugopoly:idempotency",
     "bugopoly:mock",
+    "bugopoly:race_condition",
+    "bugopoly:heisenbug",
+    "bugopoly:ci_red",
+    "bugopoly:smoke_quick",
+    "bugopoly:sql_injection",
+    "bugopoly:flaky_cause",
+    "bugopoly:stress_breakpoint",
+    "bugopoly:regression_meaning",
+    "bugopoly:code_review_goal",
+    "bugopoly:idempotent_pay",
+    "bugopoly:definition_of_done",
+    "bugopoly:rollback_safe",
+    "bugopoly:boundary_limits",
     "#c:challenges"
   ]
 }

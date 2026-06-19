@@ -1,0 +1,132 @@
+[
+  {
+    "id": "race_condition",
+    "topic": "Concurrencia",
+    "prompt": "Dos requests actualizan el mismo registro a la vez y el resultado depende del orden. ¿Qué tipo de bug es?",
+    "options": ["Memory leak", "Race condition", "Null pointer", "Off-by-one"],
+    "answer": 1,
+    "reward": 150,
+    "penalty": 75,
+    "explain": "Cuando el resultado depende del timing/orden de ejecución concurrente, es una race condition. Se evita con locks, transacciones o diseño sin estado compartido."
+  },
+  {
+    "id": "heisenbug",
+    "topic": "Depuración",
+    "prompt": "Un bug desaparece cuando agregás logs o lo corrés en el debugger. ¿Cómo se le dice?",
+    "options": ["Heisenbug", "Bohrbug", "Mandelbug", "Schrödinbug"],
+    "answer": 0,
+    "reward": 140,
+    "penalty": 60,
+    "explain": "Un Heisenbug cambia o desaparece cuando intentás observarlo (logs, debugger alteran el timing/estado)."
+  },
+  {
+    "id": "ci_red",
+    "topic": "CI/CD",
+    "prompt": "El build quedó en rojo en main. ¿Qué hace el equipo primero?",
+    "options": ["Seguir mergeando features", "Frenar y volver a verde", "Ignorarlo hasta el viernes", "Borrar el test que falla"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 70,
+    "explain": "Main roja bloquea a todos: la regla es 'detener la línea' y volver a verde antes de seguir."
+  },
+  {
+    "id": "smoke_quick",
+    "topic": "Tipos de prueba",
+    "prompt": "Antes de un deploy querés un chequeo rápido de que 'lo básico funciona'. ¿Qué corrés?",
+    "options": ["Regresión completa", "Smoke test", "Test de carga", "Test de penetración"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "El smoke test verifica rápido las funciones críticas; la regresión completa es más lenta y exhaustiva."
+  },
+  {
+    "id": "sql_injection",
+    "topic": "Seguridad",
+    "prompt": "Un input de usuario llega sin sanitizar a una query SQL. ¿Cuál es el riesgo principal?",
+    "options": ["XSS", "SQL Injection", "CSRF", "Clickjacking"],
+    "answer": 1,
+    "reward": 150,
+    "penalty": 75,
+    "explain": "Concatenar input no sanitizado en SQL permite SQL Injection. Se evita con queries parametrizadas."
+  },
+  {
+    "id": "flaky_cause",
+    "topic": "Tests inestables",
+    "prompt": "Un test pasa o falla sin cambiar el código. Lo correcto es...",
+    "options": ["Agregar un retry y mirar para otro lado", "Borrar el test", "Investigar la causa (timing/estado)", "Subir el timeout a 10 min"],
+    "answer": 2,
+    "reward": 140,
+    "penalty": 70,
+    "explain": "Hay que encontrar la causa (orden, tiempos, estado compartido). El retry solo esconde el problema."
+  },
+  {
+    "id": "stress_breakpoint",
+    "topic": "Performance",
+    "prompt": "Querés saber a partir de cuántos usuarios el sistema se rompe. ¿Qué prueba es?",
+    "options": ["Test de humo", "Test de carga", "Test de estrés", "Test unitario"],
+    "answer": 2,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "El test de estrés empuja más allá del límite para hallar el punto de quiebre; el de carga mide bajo carga esperada."
+  },
+  {
+    "id": "regression_meaning",
+    "topic": "Gestión de defectos",
+    "prompt": "Una función que andaba se rompe después de un cambio nuevo. Eso es una...",
+    "options": ["Mejora", "Regresión", "Feature", "Deuda técnica"],
+    "answer": 1,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "Una regresión es cuando algo que funcionaba deja de funcionar tras un cambio."
+  },
+  {
+    "id": "code_review_goal",
+    "topic": "Calidad",
+    "prompt": "¿Cuál es el objetivo principal de un code review?",
+    "options": ["Lucirse", "Encontrar defectos y compartir conocimiento", "Aprobar rápido", "Contar líneas"],
+    "answer": 1,
+    "reward": 120,
+    "penalty": 60,
+    "explain": "El review detecta problemas temprano y difunde contexto/conocimiento en el equipo."
+  },
+  {
+    "id": "idempotent_pay",
+    "topic": "APIs",
+    "prompt": "Reintentar la misma request de pago no debería cobrar dos veces. Esa propiedad se llama...",
+    "options": ["Idempotencia", "Atomicidad", "Concurrencia", "Latencia"],
+    "answer": 0,
+    "reward": 150,
+    "penalty": 75,
+    "explain": "Una operación idempotente da el mismo resultado aunque se repita; clave para reintentos seguros (pagos, webhooks)."
+  },
+  {
+    "id": "definition_of_done",
+    "topic": "Ágil",
+    "prompt": "¿Qué suele incluir una buena 'Definition of Done'?",
+    "options": ["Solo que compile", "Código + tests + review + deploy listo", "Que el dev diga 'ya está'", "Nada formal"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 60,
+    "explain": "La DoD define criterios claros (tests, review, docs, deploy) para considerar terminada una tarea."
+  },
+  {
+    "id": "rollback_safe",
+    "topic": "Despliegue",
+    "prompt": "Un deploy rompe producción. La acción inmediata más segura suele ser...",
+    "options": ["Hotfix a ciegas en prod", "Rollback a la versión estable", "Reiniciar y rezar", "Esperar al lunes"],
+    "answer": 1,
+    "reward": 140,
+    "penalty": 70,
+    "explain": "Volver a la última versión estable (rollback) restaura el servicio rápido; después se investiga con calma."
+  },
+  {
+    "id": "boundary_limits",
+    "topic": "Diseño de pruebas",
+    "prompt": "Un campo acepta de 1 a 100. ¿Qué valores conviene probar sí o sí?",
+    "options": ["Solo 50", "0, 1, 100 y 101 (los bordes)", "Cualquiera al azar", "Solo 100"],
+    "answer": 1,
+    "reward": 130,
+    "penalty": 65,
+    "explain": "Los bugs viven en los límites: probar los bordes y los de afuera (0,1,100,101) atrapa los off-by-one."
+  }
+]
