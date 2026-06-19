@@ -70,7 +70,7 @@ const AVATAR_URL := "https://avatars.githubusercontent.com/u/59341390?s=160"
 func _build_creator_badge() -> void:
 	# Guiño al creador: avatar de GitHub (dinámico) + nombre. Click abre el perfil; triple-click = easter egg.
 	var badge := PanelContainer.new()
-	badge.position = Vector2(1032, 16)
+	badge.position = Vector2(1032, 52)
 	var bsb := StyleBoxFlat.new()
 	bsb.bg_color = Color(0.10, 0.08, 0.07, 0.62)
 	bsb.set_corner_radius_all(22)
@@ -117,7 +117,7 @@ func _build_creator_badge() -> void:
 	k.add_theme_color_override("font_color", Brand.TEXT_MUTED)
 	vb.add_child(k)
 	var nm := Label.new()
-	nm.text = "Fernando Loján"
+	nm.text = "Fernando Lojan"
 	nm.add_theme_font_override("font", Brand.font_heavy())
 	nm.add_theme_font_size_override("font_size", 14)
 	nm.add_theme_color_override("font_color", Brand.TEXT_STRONG)
