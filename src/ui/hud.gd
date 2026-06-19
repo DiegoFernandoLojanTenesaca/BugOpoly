@@ -39,6 +39,7 @@ var _popup_box: VBoxContainer
 var _abilities_box: HBoxContainer
 var _pause_root: Control
 var _card_overlay: Control
+var _log: RichTextLabel
 
 func setup(state) -> void:
 	_state = state
@@ -52,6 +53,33 @@ func setup(state) -> void:
 	Brand.style_button(pause_btn, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
 	pause_btn.pressed.connect(_toggle_pause)
 	add_child(pause_btn)
+
+	var props_btn := Button.new()
+	props_btn.text = "Propiedades"
+	props_btn.position = Vector2(1018, 14)
+	props_btn.size = Vector2(142, 36)
+	props_btn.add_theme_font_size_override("font_size", 14)
+	Brand.style_button(props_btn, Brand.SURFACE_RAISED, Brand.INK_700, Brand.TEXT_STRONG)
+	props_btn.pressed.connect(_show_properties)
+	add_child(props_btn)
+
+	# Log lateral persistente (las últimas jugadas)
+	var log_panel := PanelContainer.new()
+	log_panel.position = Vector2(16, 62)
+	log_panel.size = Vector2(330, 232)
+	var lsb := StyleBoxFlat.new()
+	lsb.bg_color = Color(0.06, 0.05, 0.05, 0.5)
+	lsb.set_corner_radius_all(10)
+	lsb.set_content_margin_all(10)
+	log_panel.add_theme_stylebox_override("panel", lsb)
+	add_child(log_panel)
+	_log = RichTextLabel.new()
+	_log.bbcode_enabled = true
+	_log.scroll_active = true
+	_log.scroll_following = true
+	_log.add_theme_font_size_override("normal_font_size", 13)
+	_log.add_theme_color_override("default_color", Brand.TEXT_BODY)
+	log_panel.add_child(_log)
 
 	_toast = PanelContainer.new()
 	_toast.add_theme_stylebox_override("panel", _pill(Color(0.08, 0.06, 0.05, 0.92)))
@@ -220,6 +248,8 @@ func show_dice(d1: int, d2: int) -> void:
 func log_line(text: String) -> void:
 	if debug:
 		print(text)
+	if _log != null:
+		_log.append_text(text + "\n")
 	_toast_label.text = "[center]" + text + "[/center]"
 	_toast.visible = true
 	_toast.modulate.a = 1.0
@@ -589,6 +619,90 @@ func _dismiss_card() -> void:
 	var tw := create_tween()
 	tw.tween_property(o, "modulate:a", 0.0, 0.22)
 	tw.tween_callback(o.queue_free)
+
+func _show_properties() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(root)
+	var dim := ColorRect.new()
+	dim.color = Color(0.04, 0.03, 0.03, 0.72)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(680, 0)
+	panel.add_theme_stylebox_override("panel", _panel_style(Brand.SURFACE_CARD))
+	center.add_child(panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 8)
+	panel.add_child(vb)
+	var t := _title("PROPIEDADES")
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(t)
+	vb.add_child(HSeparator.new())
+	var sc := ScrollContainer.new()
+	sc.custom_minimum_size = Vector2(640, 430)
+	vb.add_child(sc)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 7)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(list)
+	var tiles: Array = _state.tiles()
+	for p in _state.players:
+		var head := HBoxContainer.new()
+		head.add_theme_constant_override("separation", 8)
+		var dot := Panel.new()
+		dot.custom_minimum_size = Vector2(14, 14)
+		var dsb := StyleBoxFlat.new()
+		dsb.bg_color = p.color
+		dsb.set_corner_radius_all(7)
+		dot.add_theme_stylebox_override("panel", dsb)
+		head.add_child(dot)
+		var nm := Label.new()
+		nm.text = "%s   ($%d%s)" % [str(p.pname), p.budget, "  · QUIEBRA" if p.bankrupt else ""]
+		nm.add_theme_font_override("font", Brand.font_heavy())
+		nm.add_theme_font_size_override("font_size", 16)
+		nm.add_theme_color_override("font_color", Brand.TEXT_STRONG)
+		head.add_child(nm)
+		list.add_child(head)
+		if p.owned.is_empty():
+			var none := Label.new()
+			none.text = "    (sin módulos todavía)"
+			none.add_theme_font_size_override("font_size", 13)
+			none.add_theme_color_override("font_color", Brand.TEXT_MUTED)
+			list.add_child(none)
+		else:
+			for idx in p.owned:
+				var tile: Dictionary = tiles[idx]
+				var sub := Registry.get_def("subsystem", str(tile.get("subsystem", "")))
+				var col := Color.html(str(sub.get("color", "#888888")))
+				var h: int = GameState.house_count(idx)
+				var cov := "CI/CD" if h >= 5 else ("cobertura %d" % h if h > 0 else "sin desarrollar")
+				var row := HBoxContainer.new()
+				var l := Label.new()
+				l.text = "    • %s" % str(tile.get("name", ""))
+				l.add_theme_font_size_override("font_size", 14)
+				l.add_theme_color_override("font_color", col.lightened(0.12))
+				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				row.add_child(l)
+				var r := Label.new()
+				r.text = "%s · renta $%d" % [cov, _rent_of(tile, idx)]
+				r.add_theme_font_size_override("font_size", 13)
+				r.add_theme_color_override("font_color", Brand.TEXT_BODY)
+				row.add_child(r)
+				list.add_child(row)
+		list.add_child(HSeparator.new())
+	var close := _btn("CERRAR", Brand.RED)
+	close.pressed.connect(root.queue_free)
+	vb.add_child(close)
+
+func _rent_of(tile: Dictionary, idx: int) -> int:
+	var base := int(tile.get("rent", int(int(tile.get("price", 0)) * 0.1)))
+	var mult := [1.0, 2.0, 3.0, 4.5, 6.0, 9.0]
+	return int(base * mult[clampi(GameState.house_count(idx), 0, 5)])
 
 func show_gameover(state) -> void:
 	var root := Control.new()
