@@ -72,8 +72,8 @@ func _build_icon_bg() -> void:
 	# Pocos iconos de DB/QA/código, chicos y tenues, solo en los bordes oscuros.
 	var spots := [
 		["database", Vector2(150, 250)], ["terminal", Vector2(135, 500)],
-		["git-branch", Vector2(360, 655)], ["server", Vector2(660, 115)],
-		["bug", Vector2(845, 135)], ["shield", Vector2(560, 665)],
+		["git-branch", Vector2(500, 662)], ["server", Vector2(660, 115)],
+		["bug", Vector2(845, 135)], ["shield", Vector2(710, 672)],
 	]
 	for sp in spots:
 		var tr := _kit_icon(sp[0], Brand.TEXT_MUTED, 64)
