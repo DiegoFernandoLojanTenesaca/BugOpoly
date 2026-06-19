@@ -366,7 +366,7 @@ func _build_scene() -> void:
 	# centro oscuro + logo en la plataforma (que no quede blanca/plana)
 	var pcenter := MeshInstance3D.new()
 	var pcm := BoxMesh.new()
-	pcm.size = Vector3(4.7, 0.04, 4.7)
+	pcm.size = Vector3(6.0, 0.04, 5.6)
 	pcenter.mesh = pcm
 	pcenter.position = Vector3(0, 0.01, 0)
 	var pcmat := StandardMaterial3D.new()
@@ -376,11 +376,15 @@ func _build_scene() -> void:
 	vp.add_child(pcenter)
 	# monstruos bailando, mirando a la cámara (+Z al frente)
 	var bv := BoardView.new()
-	var names := ["cyclops", "ghost", "demon", "bee"]
-	var xs := [-2.7, -0.9, 0.9, 2.7]
-	for mi in names.size():
-		var pos := Vector3(xs[mi], 0, 1.1)
-		var m: Node3D = bv._load_piece_model(names[mi], Brand.RED, false, "dance")
+	# dos filas que llenan el tablero; corridas a la izquierda para no taparse con las cartas (derecha)
+	var mons := [
+		["cyclops", -2.6, -1.7], ["ghost", -0.9, -1.7], ["demon", 0.7, -1.7], ["skull", 2.3, -1.7],
+		["bee", -2.2, 0.9], ["crab", -0.5, 0.9], ["panda", 1.1, 0.9],
+	]
+	for mi in mons.size():
+		var d: Array = mons[mi]
+		var pos := Vector3(d[1], 0, d[2])
+		var m: Node3D = bv._load_piece_model(d[0], Brand.RED, false, "dance")
 		if m != null:
 			m.position = pos
 			m.rotation.y = atan2(-pos.x, 9.0 - pos.z)  # mira a la cámara
