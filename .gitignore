@@ -11,6 +11,9 @@
 /sonidos/
 /vorenth-memorias/
 
+# Builds exportados (binarios)
+/build/
+
 # Comprimidos y memorias del proyecto de referencia
 *.zip
 

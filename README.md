@@ -51,6 +51,22 @@ BUGOPOLY_AUTOPLAY=1 godot --path .
 
 > En la primera corrida Godot importa los assets. Algunos modelos `.gltf` y sonidos se cargan en runtime, así que pueden tardar un toque al abrir el menú o entrar a la partida.
 
+## Exportar / compartir un build
+
+El proyecto ya trae `export_presets.cfg` (Linux y Windows, binario autocontenido con el `.pck` embebido).
+
+1. En Godot, una sola vez: **Editor → Gestionar plantillas de exportación → Descargar**.
+2. Exportar:
+
+```bash
+# Linux
+godot --headless --export-release "Linux" build/bugopoly.x86_64
+# Windows
+godot --headless --export-release "Windows Desktop" build/bugopoly.exe
+```
+
+El binario sale en `build/` (ignorado por git). Comprimilo y compartilo.
+
 ## Identidad de marca
 
 Sistema de marca completo (logo, app icon, cartas, billetes "QA Credits", tablero, tipografías) en [`docs/brand/BUGOPOLY-Art-Kit.dc.html`](docs/brand/BUGOPOLY-Art-Kit.dc.html).
