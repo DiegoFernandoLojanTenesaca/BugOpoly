@@ -374,30 +374,18 @@ func _build_scene() -> void:
 	pcmat.roughness = 0.7
 	pcenter.material_override = pcmat
 	vp.add_child(pcenter)
-	var plogo := Label3D.new()
-	plogo.text = "BUGOPOLY"
-	plogo.font = Brand.font_display()
-	plogo.font_size = 120
-	plogo.pixel_size = 0.0082
-	plogo.modulate = Brand.RED
-	plogo.outline_size = 16
-	plogo.outline_modulate = Color("1c0807")
-	plogo.position = Vector3(0, 0.05, 1.6)
-	plogo.rotation_degrees = Vector3(-90, 0, 0)
-	vp.add_child(plogo)
 	# monstruos bailando, mirando a la cámara (+Z al frente)
 	var bv := BoardView.new()
-	var spots := [["cyclops", Vector3(-2.0, 0, 1.3)], ["ghost", Vector3(2.1, 0, -0.2)], ["demon", Vector3(-0.2, 0, -2.0)], ["bee", Vector3(0.2, 0, 2.2)]]
-	var mi := 0
-	for sp in spots:
-		var pos: Vector3 = sp[1]
-		var m: Node3D = bv._load_piece_model(sp[0], Brand.RED, false, "dance")
+	var names := ["cyclops", "ghost", "demon", "bee"]
+	var xs := [-2.7, -0.9, 0.9, 2.7]
+	for mi in names.size():
+		var pos := Vector3(xs[mi], 0, 1.1)
+		var m: Node3D = bv._load_piece_model(names[mi], Brand.RED, false, "dance")
 		if m != null:
 			m.position = pos
 			m.rotation.y = atan2(-pos.x, 9.0 - pos.z)  # mira a la cámara
 			vp.add_child(m)
 			_scene_mons.append({"node": m, "y0": pos.y, "phase": float(mi) * 1.3})
-		mi += 1
 	bv.free()
 
 func _build_props() -> void:
