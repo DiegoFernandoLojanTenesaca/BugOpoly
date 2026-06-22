@@ -1,5 +1,10 @@
 ; Engine configuration file.
-; QAopoly — board game data-driven (estilo Vorenth) con tematica de Software QA.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -24,13 +29,11 @@ GfxSettings="*res://src/core/gfx_settings.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation="landscape"
 
 [rendering]
 
 renderer/rendering_method="mobile"
-renderer/rendering_method.mobile="mobile"
-environment/defaults/default_clear_color=Color(0.094, 0.106, 0.137, 1)
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
 anti_aliasing/quality/msaa_3d=2
+environment/defaults/default_clear_color=Color(0.094, 0.106, 0.137, 1)

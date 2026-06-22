@@ -79,15 +79,17 @@ godot --headless --export-release "Web" build/web/index.html
 
 Subí la carpeta `build/web/` a itch.io o GitHub Pages.
 
-**Android (APK):** todo el toolchain ya está provisionado (Android SDK + JDK 17 + plantillas de export + **build template** instalado en `android/` + debug keystore + Godot configurado). El renderer es **Mobile**, la orientación está fijada a horizontal y el icono incluido.
+**Android (APK):** se genera con el script incluido (necesita Android SDK + JDK 17 + plantillas de export):
 
 ```bash
-godot --headless --export-debug "Android" build/bugopoly.apk
+ANDROID_HOME=~/Android/Sdk DISPLAY=:0 godot --editor --path . -s tools/export_android.gd
 ```
 
-> Nota: el **export headless de Android** en esta versión de Godot (4.6.3) rechaza el preset con un *configuration error* que la CLI no imprime (sí se ve en el **editor gráfico**: *Proyecto → Exportar → Android* lo muestra en rojo, normalmente un toggle, y se resuelve en 1 clic ya que SDK/JDK/keystore están listos). PC y Web exportan sin problema porque no validan SDK.
+Sale `build/bugopoly.apk` (arm64-v8a, ~27 MB, package `com.bugopoly.game`), **firmado con la debug key** → se instala por *sideload* en el celu (Ajustes → permitir "orígenes desconocidos", copiar el APK y tocarlo). El renderer es **Mobile**, la orientación está fijada a horizontal y el icono incluido.
 
-Los builds salen en `build/` (ignorado por git). El layout usa `stretch=keep`, así que se centra sin descuadrarse en cualquier resolución/celular (con barras del color de fondo).
+> Por qué el script y no `--export-debug`: en Godot 4.6.3 el `can_export` del CLI **rechaza el preset Android con un error vacío** (bug); `export_project()` por scripting lo esquiva y construye el APK correcto. PC y Web sí exportan por CLI normal.
+
+Los builds salen en `build/` (ignorado por git). El layout usa `stretch=keep`, así que se centra sin descuadrarse en cualquier resolución/celular.
 
 ## Identidad de marca
 
