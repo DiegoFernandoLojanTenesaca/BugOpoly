@@ -57,21 +57,37 @@ BUGOPOLY_AUTOPLAY=1 godot --path .
 
 > En la primera corrida Godot importa los assets. Algunos modelos `.gltf` y sonidos se cargan en runtime, así que pueden tardar un toque al abrir el menú o entrar a la partida.
 
-## Exportar / compartir un build
+## Multiplataforma (PC · Web · Android)
 
-El proyecto ya trae `export_presets.cfg` (Linux y Windows, binario autocontenido con el `.pck` embebido).
+`export_presets.cfg` ya trae presets para **Linux, Windows, macOS, Web y Android** (binario autocontenido / icono incluido). En todos, una sola vez: **Editor → Gestionar plantillas de exportación → Descargar**.
 
-1. En Godot, una sola vez: **Editor → Gestionar plantillas de exportación → Descargar**.
-2. Exportar:
+**PC (Linux / Windows / macOS):**
 
 ```bash
-# Linux
 godot --headless --export-release "Linux" build/bugopoly.x86_64
-# Windows
 godot --headless --export-release "Windows Desktop" build/bugopoly.exe
+godot --headless --export-release "macOS" build/bugopoly.dmg
 ```
 
-El binario sale en `build/` (ignorado por git). Comprimilo y compartilo.
+Para un instalador `.exe` (opcional), envolvé el binario con Inno Setup o NSIS.
+
+**Web (lo más fácil de compartir, corre en navegador incluido el del celu):**
+
+```bash
+godot --headless --export-release "Web" build/web/index.html
+```
+
+Subí la carpeta `build/web/` a itch.io o GitHub Pages.
+
+**Android (APK):** requiere setup adicional:
+
+1. **Android SDK + JDK 17**, y en Godot: **Project → Install Android Build Template**.
+2. **Keystore** de firma (debug para probar, release para publicar).
+3. `godot --headless --export-release "Android" build/bugopoly.apk`.
+
+Pendiente para que se vea bien en celular: **UI responsive** (hoy varias posiciones son fijas para 1280×720 → pasar a anclas) y agrandar zonas táctiles. El renderer ya es **Mobile** y el icono está incluido.
+
+Los builds salen en `build/` (ignorado por git).
 
 ## Identidad de marca
 
